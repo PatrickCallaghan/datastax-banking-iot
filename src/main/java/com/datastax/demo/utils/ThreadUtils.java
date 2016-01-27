@@ -14,7 +14,7 @@ public class ThreadUtils {
 				
 		executor.shutdown();
 		try {
-			executor.awaitTermination(10, TimeUnit.SECONDS);
+			executor.awaitTermination(2, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

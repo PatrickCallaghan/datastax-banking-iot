@@ -35,6 +35,8 @@ class TransactionWriter implements KillableRunner {
 	
 	@Override
     public void shutdown() {
-        shutdown = true;
+		while(!queue.isEmpty())
+			
+		shutdown = true;
     }
 }
