@@ -24,6 +24,8 @@ public class TransactionGenerator {
 		if (Math.random() < .05)
 			creditCardNo = creditCardNo % 1000;
 
+		creditCardNo = creditCardNo + 1234123412341233;
+
 		int noOfItems = new Double(Math.ceil(Math.random() * 5)).intValue();
 
 		String location = locations.get(new Double(Math.random() * locations.size()).intValue());
