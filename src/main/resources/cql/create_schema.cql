@@ -1,4 +1,4 @@
-create keyspace if not exists datastax_banking_iot WITH replication = {'class': 'NetworkTopologyStrategy', 'Solr': 1};
+create keyspace if not exists datastax_banking_iot WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1' };
 
 use datastax_banking_iot; 
 
