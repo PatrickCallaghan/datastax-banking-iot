@@ -12,7 +12,7 @@ To create the schema, run the following
 	
 To create some transactions, run the following 
 	
-	mvn clean compile exec:java -Dexec.mainClass="com.datastax.creditcard.Main"  -DcontactPoints=localhost
+	mvn clean compile exec:java -Dexec.mainClass="com.datastax.banking.Main"  -DcontactPoints=localhost
 
 You can use the following parameters to change the default no of transactions and credit cards 
 	
@@ -20,7 +20,7 @@ You can use the following parameters to change the default no of transactions an
 	
 To create the solr core, run 
 
-	bin/dsetool create_core datastax_transaction_search_demo.latest_transactions generateResources=true reindex=true coreOptions=rt.yaml
+	bin/dsetool create_core datastax_banking_iot.latest_transactions generateResources=true reindex=true coreOptions=rt.yaml
 
 An example of cql queries would be
 
