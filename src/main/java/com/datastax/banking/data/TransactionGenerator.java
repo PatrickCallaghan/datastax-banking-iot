@@ -18,13 +18,13 @@ public class TransactionGenerator {
 	
 	public static Transaction createRandomTransaction(int noOfCreditCards) {
 
-		int creditCardNo = new Double(Math.ceil(Math.random() * noOfCreditCards)).intValue();
+		long creditCardNo = new Double(Math.ceil(Math.random() * noOfCreditCards)).longValue();
 
 		// Allow for some skew
 		if (Math.random() < .05)
 			creditCardNo = creditCardNo % 1000;
 
-		creditCardNo = creditCardNo + 1234123412341233;
+		creditCardNo = creditCardNo + 1234123412341233l;
 
 		int noOfItems = new Double(Math.ceil(Math.random() * 5)).intValue();
 
@@ -44,7 +44,7 @@ public class TransactionGenerator {
 
 		Transaction transaction = new Transaction();
 		createItemsAndAmount(noOfItems, transaction);
-		transaction.setCreditCardNo(new Integer(creditCardNo).toString());
+		transaction.setCreditCardNo(new Long(creditCardNo).toString());
 		transaction.setMerchant(issuer);
 		transaction.setTransactionId(UUID.randomUUID().toString());
 		transaction.setTransactionTime(date.toDate());
