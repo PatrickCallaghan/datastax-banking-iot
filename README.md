@@ -12,7 +12,7 @@ To create the schema, run the following
 	
 To create some transactions, run the following 
 	
-	mvn clean compile exec:java -Dexec.mainClass="com.datastax.creditcard.Main"  -DcontactPoints=localhost
+	mvn clean compile exec:java -Dexec.mainClass="com.datastax.banking.Main"  -DcontactPoints=localhost
 
 You can use the following parameters to change the default no of transactions and credit cards 
 	
@@ -20,7 +20,7 @@ You can use the following parameters to change the default no of transactions an
 	
 To create the solr core, run 
 
-	bin/dsetool create_core datastax_transaction_search_demo.latest_transactions generateResources=true reindex=true coreOptions=rt.yaml
+	bin/dsetool create_core datastax_banking_iot.latest_transactions generateResources=true reindex=true coreOptions=rt.yaml
 
 An example of cql queries would be
 
@@ -28,20 +28,20 @@ For the latest transaction table we can run the following types of queries
 ```
 use datastax_banking_iot;
 
-select * from latest_transactions where cc_no = '1';
+select * from latest_transactions where cc_no = '1234123412341234';
 
-select * from latest_transactions where cc_no = '1' and transaction_time > '2015-12-31';
+select * from latest_transactions where cc_no = '1234123412341234' and transaction_time > '2015-12-31';
 
-select * from latest_transactions where cc_no = '1' and transaction_time > '2015-12-31' and transaction_time < '2016-01-27';
+select * from latest_transactions where cc_no = '1234123412341234' and transaction_time > '2015-12-31' and transaction_time < '2016-01-27';
 ```
 For the (historic) transaction table we need to add the year into our queries.
 
 ```
-select * from transactions where cc_no = '1' and year = 2016;
+select * from transactions where cc_no = '1234123412341234' and year = 2016;
 
-select * from transactions where cc_no = '1' and year = 2016 and transaction_time > '2015-12-31';
+select * from transactions where cc_no = '1234123412341234' and year = 2016 and transaction_time > '2015-12-31';
 
-select * from transactions where cc_no = '1' and year = 2016 and transaction_time > '2015-12-31' and transaction_time < '2016-01-27';
+select * from transactions where cc_no = '1234123412341234' and year = 2016 and transaction_time > '2015-12-31' and transaction_time < '2016-01-27';
 ```
 Using the solr_query
 
@@ -51,11 +51,11 @@ select * from latest_transactions where solr_query = 'merchant:PC+World location
 ```
 Get all the latest transactions for credit card '1' that have a tag of Work. 
 ```
-select * from latest_transactions where solr_query = '{"q":"cc_no:1", "fq":"tags:Work"}' limit  1000;
+select * from latest_transactions where solr_query = '{"q":"cc_no:1234123412341234", "fq":"tags:Work"}' limit  1000;
 ```
 Gell all the transaction for credit card '1' that have a tag of Work and are within the last month
 ```
-select * from latest_transactions where solr_query = '{"q":"cc_no:1", "fq":"tags:Work", "fq":"transaction_time:[NOW-30DAY TO *]"}' limit  1000;
+select * from latest_transactions where solr_query = '{"q":"cc_no:1234123412341234", "fq":"tags:Work", "fq":"transaction_time:[NOW-30DAY TO *]"}' limit  1000;
 ```
 To use the webservice, start the web server using 
 ```
@@ -67,7 +67,7 @@ http://{servername}:8080/datastax-banking-iot/rest/gettransactions/{creditcardno
 ```
 Note : the from and to are dates in the format yyyyMMdd hh:mm:ss - eg 
 ```
-http://localhost:8080/datastax-banking-iot/rest/gettransactions/1/20150101/20160102/
+http://localhost:8080/datastax-banking-iot/rest/gettransactions/1234123412341234/20150101/20160102/
 ```
 
 To run the requests run the following 
