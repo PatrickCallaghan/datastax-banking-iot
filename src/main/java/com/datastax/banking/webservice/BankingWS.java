@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.datastax.banking.model.Transaction;
 import com.datastax.banking.service.SearchService;
-import com.datastax.banking.service.SearchServiceImpl;
+import com.datastax.banking.service.SearchService;
 
 @WebService
 @Path("/")
@@ -29,7 +29,7 @@ public class BankingWS {
 	private SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyyMMdd");
 
 	//Service Layer.
-	private SearchService service = new SearchServiceImpl();
+	private SearchService service = new SearchService();
 	
 	@GET
 	@Path("/gettransactions/{creditcardno}/{from}/{to}")

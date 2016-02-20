@@ -16,7 +16,7 @@ import com.datastax.banking.dao.TransactionDao;
 import com.datastax.banking.data.TransactionGenerator;
 import com.datastax.banking.model.Transaction;
 import com.datastax.banking.service.SearchService;
-import com.datastax.banking.service.SearchServiceImpl;
+import com.datastax.banking.service.SearchService;
 import com.datastax.demo.utils.KillableRunner;
 import com.datastax.demo.utils.PropertyHelper;
 import com.datastax.demo.utils.ThreadUtils;
@@ -40,7 +40,7 @@ public class RunRequests {
 		int noOfCreditCards = Integer.parseInt(noOfCreditCardsStr);
 		int noOfRequests = Integer.parseInt(noOfRequestsStr);
 
-		SearchService cqlService = new SearchServiceImpl();
+		SearchService cqlService = new SearchService();
 		List<KillableRunner> tasks = new ArrayList<>();
 
 		for (int i = 0; i < noOfThreads; i++) {
