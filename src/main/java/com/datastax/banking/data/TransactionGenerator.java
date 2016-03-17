@@ -14,10 +14,13 @@ import com.datastax.banking.model.Transaction;
 
 public class TransactionGenerator {
 
-	private static DateTime date = new DateTime().minusDays(100).withTimeAtStartOfDay();
+	private static DateTime date = new DateTime().minusDays(10).withTimeAtStartOfDay();
+	private static final long DAY_MILLIS = 1000 * 60 *60 * 24;
 	
-	public static Transaction createRandomTransaction(int noOfCreditCards) {
+	public static Transaction createRandomTransaction(int noOfCreditCards, int noOfDays) {
 
+		long noOfMillis = noOfDays * DAY_MILLIS;
+		
 		long creditCardNo = new Double(Math.ceil(Math.random() * noOfCreditCards)).longValue();
 
 		// Allow for some skew
@@ -38,9 +41,8 @@ public class TransactionGenerator {
 		tags.add(note);
 		tags.add(tag);
 
-		// create time by adding a random no of seconds to the midnight of
-		// yesterday.
-		date = date.plusMillis(new Double(Math.random() * 200).intValue() + 1);
+		long millis = DateTime.now().getMillis() - (new Double(Math.random() * noOfMillis).longValue() + 1l);
+		DateTime newDate = DateTime.now().withMillis(millis);
 
 		Transaction transaction = new Transaction();
 		createItemsAndAmount(noOfItems, transaction);
@@ -51,6 +53,7 @@ public class TransactionGenerator {
 		transaction.setLocation(location);
 		transaction.setNotes(note);
 		transaction.setTags(tags);
+		transaction.setTransactionTime(newDate.toDate());
 		return transaction;
 	}
 

@@ -35,4 +35,3 @@ create table if not exists latest_transactions(
 ) WITH CLUSTERING ORDER BY (transaction_time desc) 
 and default_time_to_live = 2592000;
 
-

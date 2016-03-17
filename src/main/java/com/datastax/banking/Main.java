@@ -26,8 +26,9 @@ public class Main {
 
 		String contactPointsStr = PropertyHelper.getProperty("contactPoints", "localhost");
 		String noOfCreditCardsStr = PropertyHelper.getProperty("noOfCreditCards", "10000");
-		String noOfTransactionsStr = PropertyHelper.getProperty("noOfTransactions", "100000");
-
+		String noOfTransactionsStr = PropertyHelper.getProperty("noOfTransactions", "1000000");
+		int noOfDays = Integer.parseInt(PropertyHelper.getProperty("noOfDays", "60"));
+		
 		BlockingQueue<Transaction> queue = new ArrayBlockingQueue<Transaction>(1000);
 		List<KillableRunner> tasks = new ArrayList<>();
 		
@@ -52,7 +53,7 @@ public class Main {
 		for (int i = 0; i < noOfTransactions; i++) {
 			
 			try{
-				queue.put(TransactionGenerator.createRandomTransaction(noOfCreditCards));
+				queue.put(TransactionGenerator.createRandomTransaction(noOfCreditCards,noOfDays));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
