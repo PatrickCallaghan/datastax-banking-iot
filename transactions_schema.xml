@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<schema name="autoSolrSchema" version="1.5">
+<types>
+<fieldType class="org.apache.solr.schema.TrieDoubleField" name="TrieDoubleField"/>
+<fieldType class="org.apache.solr.schema.TextField" name="TextField">
+<analyzer>
+<tokenizer class="solr.StandardTokenizerFactory"/>
+<filter class="solr.LowerCaseFilterFactory"/>
+</analyzer>
+</fieldType>
+<fieldType class="org.apache.solr.schema.StrField" name="StrField" omitNorms="true" termVectors="false" termPositions="false" termOffsets="false"/>
+<fieldType class="org.apache.solr.schema.TrieDateField" name="TrieDateField" omitNorms="true" termVectors="false" termPositions="false" termOffsets="false"/>
+</types>
+<fields>
+<field indexed="false" multiValued="false" name="amount" stored="false" type="TrieDoubleField"/>
+<field indexed="true" multiValued="false" name="merchant" stored="false" type="TextField"/>
+<field indexed="true" multiValued="true" name="tags" stored="false" type="TextField"/>
+<field indexed="false" multiValued="false" name="location" stored="true" type="TextField"/>
+<field indexed="true" multiValued="false" name="cc_no" stored="true" type="StrField"/>
+<field indexed="false" multiValued="false" name="notes" stored="false" type="TextField"/>
+<field indexed="true" multiValued="false" name="transaction_id" stored="false" type="TextField"/>
+<dynamicField indexed="false" multiValued="false" name="items*" stored="false" type="TrieDoubleField"/>
+<field indexed="true" multiValued="false" name="user_id" stored="false" type="TextField"/>
+<field indexed="false" multiValued="false" name="status" stored="false" type="TextField"/>
+<field indexed="true" multiValued="false" name="transaction_time" stored="false" type="TrieDateField"/>
+</fields>
+<uniqueKey>(cc_no,transaction_time)</uniqueKey>
+</schema>
+
