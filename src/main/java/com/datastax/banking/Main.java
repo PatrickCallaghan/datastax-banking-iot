@@ -26,8 +26,8 @@ public class Main {
 
 		String contactPointsStr = PropertyHelper.getProperty("contactPoints", "localhost");
 		String noOfCreditCardsStr = PropertyHelper.getProperty("noOfCreditCards", "10000");
-		String noOfTransactionsStr = PropertyHelper.getProperty("noOfTransactions", "1000000");
-		int noOfDays = Integer.parseInt(PropertyHelper.getProperty("noOfDays", "60"));
+		String noOfTransactionsStr = PropertyHelper.getProperty("noOfTransactions", "100000");
+		int noOfDays = Integer.parseInt(PropertyHelper.getProperty("noOfDays", "360"));
 		
 		BlockingQueue<Transaction> queue = new ArrayBlockingQueue<Transaction>(1000);
 		List<KillableRunner> tasks = new ArrayList<>();
@@ -61,15 +61,6 @@ public class Main {
 		timer.end();
 		ThreadUtils.shutdown(tasks, executor);
 		System.exit(0);
-	}
-
-	private void sleep(int i) {
-		try {
-			Thread.sleep(i*1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
 	}
 
 	/**

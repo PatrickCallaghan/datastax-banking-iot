@@ -89,22 +89,28 @@ public class TransactionDao {
 		
 		int year = new DateTime().withMillis(transaction.getTransactionTime().getTime()).getYear();
 		
-		ResultSetFuture future = session.executeAsync(this.insertTransactionStmt.bind(transaction.getCreditCardNo(), year, 
-				transaction.getTransactionTime(), transaction.getTransactionId(), transaction.getLocation(),
-				transaction.getMerchant(), transaction.getAmount(), transaction.getUserId(), transaction.getStatus(),
-				transaction.getNotes(), transaction.getTags()));
+//		ResultSetFuture future = session.executeAsync(this.insertTransactionStmt.bind(transaction.getCreditCardNo(), year, 
+//				transaction.getTransactionTime(), transaction.getTransactionId(), transaction.getLocation(),
+//				transaction.getMerchant(), transaction.getAmount(), transaction.getUserId(), transaction.getStatus(),
+//				transaction.getNotes(), transaction.getTags()));
 		ResultSetFuture future1 = session.executeAsync(this.insertLatestTransactionStmt.bind(
 				transaction.getCreditCardNo(), transaction.getTransactionTime(), transaction.getTransactionId(),
 				transaction.getLocation(), transaction.getMerchant(), transaction.getAmount(), transaction.getUserId(),
 				transaction.getStatus(), transaction.getNotes(), transaction.getTags()));
 
-		future.getUninterruptibly();
+		//future.getUninterruptibly();
 		future1.getUninterruptibly();
 
 		long total = count.incrementAndGet();
 
 		if (total % 10000 == 0) {
 			logger.info("Total transactions processed : " + total);
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 	}
