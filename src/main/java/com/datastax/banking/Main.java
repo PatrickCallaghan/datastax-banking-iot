@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
 import com.datastax.banking.dao.TransactionDao;
 import com.datastax.banking.data.TransactionGenerator;
 import com.datastax.banking.model.Transaction;

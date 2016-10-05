@@ -31,7 +31,7 @@ create table if not exists latest_transactions(
 	status text,
 	notes text,
 	tags set<text>,
-	PRIMARY KEY (cc_no, transaction_time)
+	PRIMARY KEY (cc_no, transaction_time) 
 ) WITH CLUSTERING ORDER BY (transaction_time desc) 
 and default_time_to_live = 2592000;
 

@@ -21,22 +21,16 @@ public class TransactionGenerator {
 
 		long noOfMillis = noOfDays * DAY_MILLIS;
 		
-		long creditCardNo = new Double(Math.ceil(Math.random() * noOfCreditCards)).longValue();
-
-		// Allow for some skew
-		if (Math.random() < .05)
-			creditCardNo = creditCardNo % 1000;
-
-		creditCardNo = creditCardNo + 1234123412341233l;
+		long creditCardNo = getCreditCardNo(noOfCreditCards);
 
 		int noOfItems = new Double(Math.ceil(Math.random() * 5)).intValue();
 
 		String location = locations.get(new Double(Math.random() * locations.size()).intValue());
 
-		int randomLocation = new Double(Math.random() * issuers.size()).intValue();
-		String issuer = issuers.get(randomLocation);
-		String note = notes.get(randomLocation);
-		String tag = tagList.get(randomLocation);
+		int randomIssuer = new Double(Math.random() * issuers.size()).intValue();
+		String issuer = issuers.get(randomIssuer);
+		String note = notes.get(randomIssuer);
+		String tag = tagList.get(randomIssuer);
 		Set<String> tags = new HashSet<String>();
 		tags.add(note);
 		tags.add(tag);
@@ -55,6 +49,18 @@ public class TransactionGenerator {
 		transaction.setTags(tags);
 		transaction.setTransactionTime(newDate.toDate());
 		return transaction;
+	}
+
+
+	public static long getCreditCardNo(int noOfCreditCards) {
+		long creditCardNo = new Double(Math.ceil(Math.random() * noOfCreditCards)).longValue();
+
+		// Allow for some skew
+		if (Math.random() < .05)
+			creditCardNo = creditCardNo % 1000;
+
+		creditCardNo = creditCardNo + 1234123412341233l;
+		return creditCardNo;
 	}
 
 	
@@ -82,10 +88,10 @@ public class TransactionGenerator {
 	public static List<String> locations = Arrays.asList("London", "Manchester", "Liverpool", "Glasgow", "Dundee",
 			"Birmingham");
 
-	public static List<String> issuers = Arrays.asList("Tesco", "Sainsbury", "Asda Wal-Mart Stores", "Morrisons",
-			"Marks & Spencer", "Boots", "John Lewis", "Waitrose", "Argos", "Co-op", "Currys", "PC World", "B&Q",
-			"Somerfield", "Next", "Spar", "Amazon", "Costa", "Starbucks", "BestBuy", "Wickes", "TFL", "National Rail",
-			"Pizza Hut", "Local Pub");
+	public static List<String> issuers = Arrays.asList("Tesco", "Sainsbury", "AsdaWal-MartStores", "Morrisons",
+			"Marks&Spencer", "Boots", "JohnLewis", "Waitrose", "Argos", "Co-op", "Currys", "PCWorld", "B&Q",
+			"Somerfield", "Next", "Spar", "Amazon", "Costa", "Starbucks", "BestBuy", "Wickes", "TFL", "NationalRail",
+			"PizzaHut", "LocalPub");
 
 	public static List<String> notes = Arrays.asList("Shopping", "Shopping", "Shopping", "Shopping", "Shopping",
 			"Pharmacy", "HouseHold", "Shopping", "Household", "Shopping", "Tech", "Tech", "Diy", "Shopping", "Clothes",

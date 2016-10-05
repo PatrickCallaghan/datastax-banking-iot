@@ -6,7 +6,7 @@ import com.datastax.banking.dao.TransactionDao;
 import com.datastax.banking.model.Transaction;
 import com.datastax.demo.utils.KillableRunner;
 
-class TransactionWriter implements KillableRunner {
+public class TransactionWriter implements KillableRunner {
 
 	private volatile boolean shutdown = false;
 	private TransactionDao dao;

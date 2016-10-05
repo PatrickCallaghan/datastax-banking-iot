@@ -50,7 +50,7 @@ public class BankingWS {
 		}
 				
 		List<Transaction> result = service.getTransactionsByTagAndDate(ccNo, null, from, to);
-		
+		logger.info("Returned response");
 		return Response.status(Status.OK).entity(result).build();
 	}
 	

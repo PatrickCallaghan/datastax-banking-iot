@@ -1,5 +1,6 @@
 package com.datastax.banking;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import org.joda.time.DateTime;
@@ -8,7 +9,7 @@ import com.datastax.banking.model.Transaction;
 import com.datastax.banking.service.SearchService;
 import com.datastax.demo.utils.KillableRunner;
 
-class TransactionReader implements KillableRunner {
+public class TransactionReader implements KillableRunner {
 
 	private volatile boolean shutdown = false;
 	private SearchService service;
@@ -27,9 +28,9 @@ class TransactionReader implements KillableRunner {
 			
 			if (transaction!=null){
 				try {
-					this.service.getTransactionsByTagAndDate(transaction.getCreditCardNo(), 
+					List<Transaction> t = this.service.getTransactionsForCCNoTagsAndDateSolr(transaction.getCreditCardNo(), 
 							transaction.getTags(), DateTime.now().minusDays(100), DateTime.now());
-					
+										
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
