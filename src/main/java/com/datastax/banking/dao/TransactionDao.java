@@ -64,7 +64,7 @@ public class TransactionDao {
 	private AtomicLong count = new AtomicLong(0);
 	
 	private final MetricRegistry metrics = new MetricRegistry();
-	private final Histogram responseSizes = metrics.histogram(MetricRegistry.name(TransactionDao.class, "response-times"));
+	private final Histogram responseSizes = metrics.histogram(MetricRegistry.name(TransactionDao.class, "latencies"));
 
 	public TransactionDao(String[] contactPoints) {
 
@@ -118,7 +118,7 @@ public class TransactionDao {
 		long end = System.nanoTime();
 		long microseconds = (end - start)/1000;
 		
-		responseSizes.update(microseconds/1000);
+		responseSizes.update((long)microseconds/(long)1000);
 		
 		long total = count.incrementAndGet();
 
@@ -139,8 +139,9 @@ public class TransactionDao {
 	}
 
 	private void printStats() {
-		logger.info (this.responseSizes.getSnapshot().getMean() + " " + this.responseSizes.getSnapshot().get95thPercentile() + ", " + this.responseSizes.getSnapshot().get99thPercentile()  + 
-				this.responseSizes.getSnapshot().get999thPercentile() + ", " + this.responseSizes.getSnapshot().getMax());
+		logger.info (this.responseSizes.getSnapshot().get95thPercentile() + ", " + this.responseSizes.getSnapshot().get99thPercentile()  + ", " + 
+				this.responseSizes.getSnapshot().get999thPercentile() + ", " + this.responseSizes.getSnapshot().getMax() + 
+				" Mean : " + this.responseSizes.getSnapshot().getMean());
 		
 	}
 
