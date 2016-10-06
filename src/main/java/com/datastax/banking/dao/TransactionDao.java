@@ -62,6 +62,7 @@ public class TransactionDao {
 	private MovingAverage ma = new MovingAverage(50);
 
 	private AtomicLong count = new AtomicLong(0);
+	private long max = 0;
 	
 	private final MetricRegistry metrics = new MetricRegistry();
 	private final Histogram responseSizes = metrics.histogram(MetricRegistry.name(TransactionDao.class, "latencies"));
@@ -118,16 +119,17 @@ public class TransactionDao {
 		long end = System.nanoTime();
 		long microseconds = (end - start)/1000;
 		
-		responseSizes.update((long)microseconds/(long)1000);
+		responseSizes.update(microseconds);
+		
+		if (microseconds > max){
+			max = microseconds;
+			logger.info("Max : " + max);
+		}
 		
 		long total = count.incrementAndGet();
 
 		if (total % 10000 == 0) {
-			logger.info("Total transactions processed : " + total);
-			
-			
-			printStats();
-			
+			logger.info("Total transactions processed : " + total   + " - " + printStats());
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -138,13 +140,16 @@ public class TransactionDao {
 
 	}
 
-	private void printStats() {
-		logger.info (this.responseSizes.getSnapshot().get95thPercentile() + ", " + this.responseSizes.getSnapshot().get99thPercentile()  + ", " + 
-				this.responseSizes.getSnapshot().get999thPercentile() + ", " + this.responseSizes.getSnapshot().getMax() + 
-				" Mean : " + this.responseSizes.getSnapshot().getMean());
+	private String printStats() {
+		return (format(this.responseSizes.getSnapshot().get95thPercentile()) + ", " + format(this.responseSizes.getSnapshot().get99thPercentile())  + ", " + 
+				format(this.responseSizes.getSnapshot().get999thPercentile()) + ", " + format(this.responseSizes.getSnapshot().getMax()) + 
+				" Mean : " + format(this.responseSizes.getSnapshot().getMean()));
 		
 	}
 
+	public String format(double d){
+		return String.format( "%.2f", d/1000);
+	}
 	public Transaction getTransaction(String transactionId) {
 
 		ResultSetFuture rs = this.session.executeAsync(this.getTransactionById.bind(transactionId));
