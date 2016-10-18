@@ -149,6 +149,7 @@ public class TransactionDao {
 
 		if (total % 10000 == 0) {
 			logger.info("Total transactions processed : " + total   + " - " + printStats());
+			printHostInfo();
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -159,14 +160,16 @@ public class TransactionDao {
 
 	}
 
-	private String printStats() {
-		
+	private void printHostInfo(){
 		Collection<Host> connectedHosts = session.getState().getConnectedHosts();
 		
 		for (Host host : connectedHosts){
 			logger.info("Open Connections(" + host.getAddress() + ") : " + session.getState().getOpenConnections(host));
 			logger.info("In Flight Queries(" + host.getAddress() + ") : " + session.getState().getInFlightQueries(host));
 		}
+	}
+	
+	private String printStats() {		
 		
 		return (cluster.getMetrics().getErrorMetrics().getSpeculativeExecutions().getCount() + "," +
 				cluster.getMetrics().getRequestsTimer().getCount() + "," +
@@ -243,7 +246,8 @@ public class TransactionDao {
 		long millis = timer1.getTimeTakenMillis();
 		ma.newNum(millis);
 		System.out.println(ma.getAvg());
-	
+		printHostInfo();
+		
 		return processResultSet(resultSet, tags);
 	}
 		
@@ -258,7 +262,7 @@ public class TransactionDao {
 		long millis = timer1.getTimeTakenMillis();
 		ma.newNum(millis);
 		System.out.println(ma.getAvg());
-	
+		printHostInfo();
 		return processResultSet(resultSet, null);
 	}
 	
@@ -276,7 +280,7 @@ public class TransactionDao {
 		long millis = timer1.getTimeTakenMillis();
 		ma.newNum(millis);
 		System.out.println(ma.getAvg());
-	
+		printHostInfo();
 		return processResultSet(resultSet, null);
 	}
 	
