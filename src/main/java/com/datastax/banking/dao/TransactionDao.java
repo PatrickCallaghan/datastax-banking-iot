@@ -107,6 +107,10 @@ public class TransactionDao {
 			this.insertLatestTransactionStmt.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
 			this.insertTransactionStmt.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
 
+			this.getLatestTransactionByCCno.setIdempotent(true);
+			this.insertLatestTransactionStmt.setIdempotent(true);
+			this.insertTransactionStmt.setIdempotent(true);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			session.close();
