@@ -26,6 +26,8 @@ import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.policies.ConstantSpeculativeExecutionPolicy;
+import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
+import com.datastax.driver.core.policies.TokenAwarePolicy;
 
 /**
  * Inserts into 2 tables
@@ -82,6 +84,7 @@ public class TransactionDao {
 		cluster = Cluster.builder()
 				.addContactPoints(contactPoints)
 				.withSpeculativeExecutionPolicy(policy)				
+				.withLoadBalancingPolicy(new TokenAwarePolicy(DCAwareRoundRobinPolicy.builder().build()))
 				.build();
 		
 		this.session = cluster.connect();
