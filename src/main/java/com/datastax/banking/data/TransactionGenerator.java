@@ -17,7 +17,7 @@ public class TransactionGenerator {
 	private static DateTime date = new DateTime().minusDays(10).withTimeAtStartOfDay();
 	private static final long DAY_MILLIS = 1000 * 60 *60 * 24;
 	
-	public static Transaction createRandomTransaction(int noOfCreditCards, int noOfDays) {
+	public static Transaction createRandomTransaction(int noOfCreditCards, int noOfDays, Transaction transaction) {
 
 		long noOfMillis = noOfDays * DAY_MILLIS;
 		
@@ -38,8 +38,6 @@ public class TransactionGenerator {
 		long millis = DateTime.now().getMillis() - (new Double(Math.random() * noOfMillis).longValue() + 1l);
 		DateTime newDate = DateTime.now().withMillis(millis);
 
-		Transaction transaction = new Transaction();
-		createItemsAndAmount(noOfItems, transaction);
 		transaction.setCreditCardNo(new Long(creditCardNo).toString());
 		transaction.setMerchant(issuer);
 		transaction.setTransactionId(UUID.randomUUID().toString());
