@@ -89,6 +89,7 @@ public class TransactionDao {
 				.withSpeculativeExecutionPolicy(policy)
 				.build();
 
+		
 		cluster.register(tracker);
 		
 		this.session = cluster.connect();

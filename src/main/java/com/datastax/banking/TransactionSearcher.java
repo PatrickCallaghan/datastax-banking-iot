@@ -5,20 +5,19 @@ import java.util.concurrent.BlockingQueue;
 
 import org.joda.time.DateTime;
 
-import com.datastax.banking.dao.TransactionDao;
 import com.datastax.banking.model.Transaction;
 import com.datastax.banking.service.SearchService;
 import com.datastax.demo.utils.KillableRunner;
 
-public class TransactionReader implements KillableRunner {
+public class TransactionSearcher implements KillableRunner {
 
 	private volatile boolean shutdown = false;
-	private TransactionDao dao;
+	private SearchService service;
 	private BlockingQueue<Transaction> queue;
 
-	public TransactionReader(TransactionDao dao, BlockingQueue<Transaction> queue) {
+	public TransactionSearcher(SearchService service, BlockingQueue<Transaction> queue) {
+		this.service = service;
 		this.queue = queue;
-		this.dao =dao;
 	}
 
 	@Override
@@ -29,11 +28,12 @@ public class TransactionReader implements KillableRunner {
 			
 			if (transaction!=null){
 				try {
-					dao.getTransaction(transaction.getTransactionId());					
+					List<Transaction> t = this.service.getTransactionsForCCNoTagsAndDateSolr(transaction.getCreditCardNo(), 
+							transaction.getTags(), DateTime.now().minusDays(100), DateTime.now());
+										
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-		
 			}				
 		}				
 	}

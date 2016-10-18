@@ -13,7 +13,7 @@ import com.datastax.demo.utils.Timer;
 
 public class SearchService {
 
-	private static TransactionDao dao;
+	public static TransactionDao dao;
 	private long timerSum = 0;
 	private AtomicLong timerCount= new AtomicLong();
 
@@ -24,7 +24,7 @@ public class SearchService {
 			SearchService.dao = new TransactionDao(contactPointsStr.split(","));
 		}
 	}	
-
+	
 	public double getTimerAvg(){
 		return timerSum/timerCount.get();
 	}

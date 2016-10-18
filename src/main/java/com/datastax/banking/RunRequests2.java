@@ -21,18 +21,17 @@ import com.datastax.demo.utils.PropertyHelper;
 import com.datastax.demo.utils.ThreadUtils;
 import com.datastax.demo.utils.Timer;
 
-public class RunRequests {
+public class RunRequests2 {
 
-	private static Logger logger = LoggerFactory.getLogger(RunRequests.class);
+	private static Logger logger = LoggerFactory.getLogger(RunRequests2.class);
 
-	public RunRequests() {
+	public RunRequests2() {
 
 
 		String contactPointsStr = PropertyHelper.getProperty("contactPoints", "localhost");
 		String noOfCreditCardsStr = PropertyHelper.getProperty("noOfCreditCards", "1000000");
 		String noOfRequestsStr = PropertyHelper.getProperty("noOfRequests", "1000");
 
-		TransactionDao dao = new TransactionDao(contactPointsStr.split(","));
 		BlockingQueue<Transaction> queue = new ArrayBlockingQueue<Transaction>(50);
 		int noOfThreads = Integer.parseInt(PropertyHelper.getProperty("noOfThreads", "2"));
 		ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
@@ -40,12 +39,12 @@ public class RunRequests {
 		int noOfCreditCards = Integer.parseInt(noOfCreditCardsStr);
 		int noOfRequests = Integer.parseInt(noOfRequestsStr);
 
-		SearchService cqlService = new SearchService();
+		TransactionDao dao = new TransactionDao(contactPointsStr.split(","));
 		List<KillableRunner> tasks = new ArrayList<>();
 
 		for (int i = 0; i < noOfThreads; i++) {
 
-			KillableRunner task = new TransactionSearcher(cqlService, queue);
+			KillableRunner task = new TransactionReader(dao, queue);
 			executor.execute(task);
 			tasks.add(task);
 		}
@@ -83,7 +82,7 @@ public class RunRequests {
 		
 		ThreadUtils.shutdown(tasks, executor);
 		timer.end();
-		logger.info("CQL Query took " + timer.getTimeTakenMillis() + " ms for " +noOfRequests+ " requests. Avg : " + cqlService.getTimerAvg() + "ms per lookup");
+		logger.info("CQL Query took " + timer.getTimeTakenMillis() + " ms for " +noOfRequests+ " requests.");
 		System.exit(0);	
 	}
 
@@ -91,7 +90,7 @@ public class RunRequests {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		new RunRequests();
+		new RunRequests2();
 
 		System.exit(0);
 	}
