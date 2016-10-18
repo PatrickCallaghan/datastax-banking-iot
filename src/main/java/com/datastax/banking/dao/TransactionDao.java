@@ -246,7 +246,7 @@ public class TransactionDao {
 		long millis = timer1.getTimeTakenMillis();
 		ma.newNum(millis);
 		System.out.println(ma.getAvg());
-		printHostInfo();
+		printStats();
 		
 		return processResultSet(resultSet, tags);
 	}
@@ -262,7 +262,7 @@ public class TransactionDao {
 		long millis = timer1.getTimeTakenMillis();
 		ma.newNum(millis);
 		System.out.println(ma.getAvg());
-		printHostInfo();
+		printStats();
 		return processResultSet(resultSet, null);
 	}
 	
@@ -280,7 +280,7 @@ public class TransactionDao {
 		long millis = timer1.getTimeTakenMillis();
 		ma.newNum(millis);
 		System.out.println(ma.getAvg());
-		printHostInfo();
+		printStats();
 		return processResultSet(resultSet, null);
 	}
 	
