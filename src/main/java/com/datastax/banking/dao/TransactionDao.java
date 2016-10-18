@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.joda.time.DateTime;
@@ -26,6 +27,9 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.policies.ConstantSpeculativeExecutionPolicy;
+import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
+import com.datastax.driver.core.policies.LatencyAwarePolicy;
 import com.datastax.driver.core.policies.PercentileSpeculativeExecutionPolicy;
 
 /**
@@ -76,23 +80,13 @@ public class TransactionDao {
 
 	public TransactionDao(String[] contactPoints) {
 
-		PerHostPercentileTracker tracker = PerHostPercentileTracker
-			    .builder(1500)
-			    .build();
-		
-		PercentileSpeculativeExecutionPolicy policy =
-			    new PercentileSpeculativeExecutionPolicy(
-			        tracker,
-			        99.0,     // percentile
-			        2); 
+		ConstantSpeculativeExecutionPolicy policy =
+			    new ConstantSpeculativeExecutionPolicy(5,3);
 		
 		cluster = Cluster.builder()
 				.addContactPoints(contactPoints)
-				.withSpeculativeExecutionPolicy(policy)
+				.withSpeculativeExecutionPolicy(policy)				
 				.build();
-
-		
-		cluster.register(tracker);
 		
 		this.session = cluster.connect();
 		
@@ -156,7 +150,7 @@ public class TransactionDao {
 
 		if (total % 10000 == 0) {
 			logger.info("Total transactions processed : " + total   + " - " + printStats());
-			printHostInfo();
+			//printHostInfo();
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -232,7 +226,7 @@ public class TransactionDao {
 	}
 
 	public List<Transaction> getTransactionsForCCNoTagsAndDate(String ccNo, Set<String> tags, DateTime from, DateTime to) {
-		ResultSet resultSet = this.session.execute(getTransactionByCCno.bind(ccNo, from.toDate(), to.toDate()));
+		ResultSet resultSet = this.session.execute(getLatestTransactionByCCnoDate.bind(ccNo, from.toDate(), to.toDate()));
 
 		return processResultSet(resultSet, tags);
 	}
