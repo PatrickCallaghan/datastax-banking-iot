@@ -29,7 +29,7 @@ public class TransactionReader implements KillableRunner {
 			
 			if (transaction!=null){
 				try {
-					dao.getTransaction(transaction.getTransactionId());					
+					dao.getLatestTransactionsForCCNo(transaction.getCreditCardNo());					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
