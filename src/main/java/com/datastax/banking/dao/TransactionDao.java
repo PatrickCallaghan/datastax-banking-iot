@@ -135,7 +135,7 @@ public class TransactionDao {
 		long end = System.nanoTime();
 		long microseconds = (end - start)/1000;
 		
-		responseSizes.update(microseconds);
+		//responseSizes.update(microseconds);
 		
 		if (microseconds > max){
 			max = microseconds;
@@ -218,8 +218,6 @@ public class TransactionDao {
 		long end = System.nanoTime();
 		long microseconds = (end - start)/1000;
 		
-		responseSizes.update(microseconds);
-		
 		if (microseconds > max){
 			max = microseconds;
 			logger.info("Max : " + max);
@@ -249,8 +247,6 @@ public class TransactionDao {
 		String location = TransactionGenerator.locations.get(new Double(Math.random() * TransactionGenerator.locations.size()).intValue());
 		String issuer = TransactionGenerator.issuers.get(new Double(Math.random() * TransactionGenerator.issuers.size()).intValue());
 	
-		Timer timer1 = new Timer();
-		timer1.start();
 		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='" + ccNo + "' and solr_query = "
 				+ "'{\"q\":\"cc_no:" + ccNo + "\", \"fq\":\"tags:Home AND "
 						+ "location:" + location + " AND amount:[100 TO 3000] AND transaction_time:[2016-05-20T17:33:18Z TO *] \"}' limit  1000;";
@@ -263,10 +259,6 @@ public class TransactionDao {
 
 		
 		ResultSet resultSet = this.session.execute(cql);
-		timer1.end();
-		long millis = timer1.getTimeTakenMillis();
-		ma.newNum(millis);
-		System.out.println(ma.getAvg());
 		logger.info(printStats());
 		
 		return processResultSet(resultSet, tags);
