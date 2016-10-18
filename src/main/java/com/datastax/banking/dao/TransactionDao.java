@@ -217,6 +217,7 @@ public class TransactionDao {
 
 	public List<Transaction> getLatestTransactionsForCCNo(String ccNo) {
 		ResultSet resultSet = this.session.execute(getLatestTransactionByCCno.bind(ccNo));
+		logger.info(printStats());
 		return processResultSet(resultSet, null);
 	}
 
