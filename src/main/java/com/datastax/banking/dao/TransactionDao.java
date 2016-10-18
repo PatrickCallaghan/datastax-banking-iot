@@ -1,6 +1,7 @@
 package com.datastax.banking.dao;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +19,7 @@ import com.datastax.demo.utils.MovingAverage;
 import com.datastax.demo.utils.Timer;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.Host;
 import com.datastax.driver.core.PerHostPercentileTracker;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
@@ -68,6 +70,7 @@ public class TransactionDao {
 	
 	private final MetricRegistry metrics = new MetricRegistry();
 	private final Histogram responseSizes = metrics.histogram(MetricRegistry.name(TransactionDao.class, "latencies"));
+	private Cluster cluster;
 
 	public TransactionDao(String[] contactPoints) {
 
@@ -81,7 +84,7 @@ public class TransactionDao {
 			        99.0,     // percentile
 			        2); 
 		
-		Cluster cluster = Cluster.builder()
+		cluster = Cluster.builder()
 				.addContactPoints(contactPoints)
 				.withSpeculativeExecutionPolicy(policy)
 				.build();
@@ -157,7 +160,17 @@ public class TransactionDao {
 	}
 
 	private String printStats() {
-		return (format(this.responseSizes.getSnapshot().get95thPercentile()) + ", " + format(this.responseSizes.getSnapshot().get99thPercentile())  + ", " + 
+		
+		Collection<Host> connectedHosts = session.getState().getConnectedHosts();
+		
+		for (Host host : connectedHosts){
+			logger.info("Open Connections(" + host.getAddress() + ") : " + session.getState().getOpenConnections(host));
+			logger.info("In Flight Queries(" + host.getAddress() + ") : " + session.getState().getInFlightQueries(host));
+		}
+		
+		return (cluster.getMetrics().getErrorMetrics().getSpeculativeExecutions().getCount() + "," +
+				cluster.getMetrics().getRequestsTimer().getCount() + 
+				format(this.responseSizes.getSnapshot().get95thPercentile()) + ", " + format(this.responseSizes.getSnapshot().get99thPercentile())  + ", " + 
 				format(this.responseSizes.getSnapshot().get999thPercentile()) + ", " + format(this.responseSizes.getSnapshot().getMax()) + 
 				" Mean : " + format(this.responseSizes.getSnapshot().getMean()));
 		
