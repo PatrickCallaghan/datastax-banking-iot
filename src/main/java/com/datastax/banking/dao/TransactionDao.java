@@ -213,7 +213,7 @@ public class TransactionDao {
 		
 		long start = System.nanoTime();
 		
-		ResultSet resultSet = this.session.execute(getLatestTransactionByCCno.bind(ccNo));
+		ResultSetFuture resultSet = this.session.executeAsync(getLatestTransactionByCCno.bind(ccNo));
 		
 		long end = System.nanoTime();
 		long microseconds = (end - start)/1000;
@@ -228,7 +228,7 @@ public class TransactionDao {
 			logger.info(printStats());
 		}
 		
-		return processResultSet(resultSet, null);
+		return processResultSet(resultSet.getUninterruptibly(), null);
 	}
 
 	public List<Transaction> getLatestTransactionsForCCNoTagsAndDate(String ccNo, Set<String> tags, DateTime from,
