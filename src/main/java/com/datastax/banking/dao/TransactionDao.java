@@ -210,7 +210,21 @@ public class TransactionDao {
 	}
 
 	public List<Transaction> getLatestTransactionsForCCNo(String ccNo) {
+		
+		long start = System.nanoTime();
+		
 		ResultSet resultSet = this.session.execute(getLatestTransactionByCCno.bind(ccNo));
+		
+		long end = System.nanoTime();
+		long microseconds = (end - start)/1000;
+		
+		responseSizes.update(microseconds);
+		
+		if (microseconds > max){
+			max = microseconds;
+			logger.info("Max : " + max);
+		}
+		
 		counter++;
 		if (counter % 10000==0){
 			logger.info(printStats());
