@@ -124,11 +124,24 @@ public class TransactionDao {
 		// transaction.getNotes(), transaction.getTags()));
 		
 		
+		long start = System.nanoTime();
+		
 		session.execute(this.insertLatestTransactionStmt.bind(
 				transaction.getCreditCardNo(), transaction.getTransactionTime(), transaction.getTransactionId(),
 				transaction.getLocation(), transaction.getMerchant(), transaction.getAmount(), transaction.getUserId(),
 				transaction.getStatus(), transaction.getNotes(), transaction.getTags()));
 
+		// do stuff
+		long end = System.nanoTime();
+		long microseconds = (end - start)/1000;
+		
+		//responseSizes.update(microseconds);
+		
+		if (microseconds > max){
+			max = microseconds;
+			logger.info("Max : " + max);
+		}
+		
 		long total = count.incrementAndGet();
 
 		if (total % 10000 == 0) {
@@ -198,7 +211,17 @@ public class TransactionDao {
 
 	public List<Transaction> getLatestTransactionsForCCNo(String ccNo) {
 		
+		long start = System.nanoTime();
+		
 		ResultSetFuture resultSet = this.session.executeAsync(getLatestTransactionByCCno.bind(ccNo));
+		
+		long end = System.nanoTime();
+		long microseconds = (end - start)/1000;
+		
+		if (microseconds > max){
+			max = microseconds;
+			logger.info("Max : " + max);
+		}
 		
 		counter++;
 		if (counter % 10000==0){
