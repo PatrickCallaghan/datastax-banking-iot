@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
-import com.datastax.banking.MyConstantSpeculativeExecutionPolicy;
 import com.datastax.banking.data.TransactionGenerator;
 import com.datastax.banking.model.Transaction;
 import com.datastax.demo.utils.MovingAverage;
@@ -26,6 +25,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.policies.ConstantSpeculativeExecutionPolicy;
 
 /**
  * Inserts into 2 tables
@@ -76,8 +76,8 @@ public class TransactionDao {
 
 	public TransactionDao(String[] contactPoints) {
 
-		MyConstantSpeculativeExecutionPolicy policy =
-			    new MyConstantSpeculativeExecutionPolicy(5,3);
+		ConstantSpeculativeExecutionPolicy policy =
+			    new ConstantSpeculativeExecutionPolicy(5,3);
 		
 		cluster = Cluster.builder()
 				.addContactPoints(contactPoints)
