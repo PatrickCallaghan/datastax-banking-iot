@@ -169,7 +169,7 @@ public class TransactionDao {
 		}
 		
 		return (cluster.getMetrics().getErrorMetrics().getSpeculativeExecutions().getCount() + "," +
-				cluster.getMetrics().getRequestsTimer().getCount() + 
+				cluster.getMetrics().getRequestsTimer().getCount() + "," +
 				format(this.responseSizes.getSnapshot().get95thPercentile()) + ", " + format(this.responseSizes.getSnapshot().get99thPercentile())  + ", " + 
 				format(this.responseSizes.getSnapshot().get999thPercentile()) + ", " + format(this.responseSizes.getSnapshot().getMax()) + 
 				" Mean : " + format(this.responseSizes.getSnapshot().getMean()));
