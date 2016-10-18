@@ -18,11 +18,13 @@ import com.datastax.demo.utils.MovingAverage;
 import com.datastax.demo.utils.Timer;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.PerHostPercentileTracker;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.policies.PercentileSpeculativeExecutionPolicy;
 
 /**
  * Inserts into 2 tables
@@ -69,11 +71,25 @@ public class TransactionDao {
 
 	public TransactionDao(String[] contactPoints) {
 
-		Cluster cluster = Cluster.builder().addContactPoints(contactPoints).build();
+		PerHostPercentileTracker tracker = PerHostPercentileTracker
+			    .builder(1500)
+			    .build();
+		
+		PercentileSpeculativeExecutionPolicy policy =
+			    new PercentileSpeculativeExecutionPolicy(
+			        tracker,
+			        99.0,     // percentile
+			        2); 
+		
+		Cluster cluster = Cluster.builder()
+				.addContactPoints(contactPoints)
+				.withSpeculativeExecutionPolicy(policy)
+				.build();
 
+		cluster.register(tracker);
+		
 		this.session = cluster.connect();
 		
-
 		try {
 			this.insertTransactionStmt = session.prepare(INSERT_INTO_TRANSACTION);
 			this.insertLatestTransactionStmt = session.prepare(INSERT_INTO_LATEST_TRANSACTION);
