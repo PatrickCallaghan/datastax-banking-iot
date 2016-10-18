@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.joda.time.DateTime;
@@ -21,16 +20,12 @@ import com.datastax.demo.utils.Timer;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.Host;
-import com.datastax.driver.core.PerHostPercentileTracker;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.policies.ConstantSpeculativeExecutionPolicy;
-import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
-import com.datastax.driver.core.policies.LatencyAwarePolicy;
-import com.datastax.driver.core.policies.PercentileSpeculativeExecutionPolicy;
 
 /**
  * Inserts into 2 tables
@@ -77,6 +72,7 @@ public class TransactionDao {
 	private final MetricRegistry metrics = new MetricRegistry();
 	private final Histogram responseSizes = metrics.histogram(MetricRegistry.name(TransactionDao.class, "latencies"));
 	private Cluster cluster;
+	private int counter;
 
 	public TransactionDao(String[] contactPoints) {
 
@@ -215,7 +211,11 @@ public class TransactionDao {
 
 	public List<Transaction> getLatestTransactionsForCCNo(String ccNo) {
 		ResultSet resultSet = this.session.execute(getLatestTransactionByCCno.bind(ccNo));
-		logger.info(printStats());
+		counter++;
+		if (counter % 10000==0){
+			logger.info(printStats());
+		}
+		
 		return processResultSet(resultSet, null);
 	}
 
