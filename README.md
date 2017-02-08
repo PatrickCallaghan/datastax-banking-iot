@@ -34,6 +34,15 @@ select * from latest_transactions where cc_no = '1234123412341234' and transacti
 
 select * from latest_transactions where cc_no = '1234123412341234' and transaction_time > '2015-12-31' and transaction_time < '2016-01-27';
 ```
+
+We can also use functions like sum to aggregate the totals from a time range. 
+
+```
+use datastax_banking_iot;
+
+select sum(amount) from latest_transactions where cc_no = '1234123412398291' and transaction_time > '2016-08-08';
+```
+
 For the (historic) transaction table we need to add the year into our queries.
 
 ```

@@ -25,6 +25,8 @@ public class TransactionGenerator {
 
 		int noOfItems = new Double(Math.ceil(Math.random() * 5)).intValue();
 
+		createItemsAndAmount(noOfItems, transaction);
+		
 		String location = locations.get(new Double(Math.random() * locations.size()).intValue());
 
 		int randomIssuer = new Double(Math.random() * issuers.size()).intValue();
