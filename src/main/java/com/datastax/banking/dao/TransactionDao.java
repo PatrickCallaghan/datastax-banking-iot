@@ -1,4 +1,4 @@
-	package com.datastax.banking.dao;
+package com.datastax.banking.dao;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,12 +65,12 @@ public class TransactionDao {
 	private PreparedStatement getTransactionByCCno;
 	private PreparedStatement getLatestTransactionByCCno;
 	private PreparedStatement getLatestTransactionByCCnoDate;
-	
+
 	private MovingAverage ma = new MovingAverage(50);
 
 	private AtomicLong count = new AtomicLong(0);
 	private long max = 0;
-	
+
 	private final MetricRegistry metrics = new MetricRegistry();
 	private final Histogram responseSizes = metrics.histogram(MetricRegistry.name(TransactionDao.class, "latencies"));
 	private Cluster cluster;
@@ -78,17 +78,13 @@ public class TransactionDao {
 
 	public TransactionDao(String[] contactPoints) {
 
-		ConstantSpeculativeExecutionPolicy policy =
-			    new ConstantSpeculativeExecutionPolicy(5,3);
-		
-		cluster = Cluster.builder()
-				.addContactPoints(contactPoints)
-				.withSpeculativeExecutionPolicy(policy)				
-				.withLoadBalancingPolicy(new TokenAwarePolicy(DCAwareRoundRobinPolicy.builder().build()))
-				.build();
-		
+		ConstantSpeculativeExecutionPolicy policy = new ConstantSpeculativeExecutionPolicy(5, 3);
+
+		cluster = Cluster.builder().addContactPoints(contactPoints).withSpeculativeExecutionPolicy(policy)
+				.withLoadBalancingPolicy(new TokenAwarePolicy(DCAwareRoundRobinPolicy.builder().build())).build();
+
 		this.session = cluster.connect();
-		
+
 		try {
 			this.insertTransactionStmt = session.prepare(INSERT_INTO_TRANSACTION);
 			this.insertLatestTransactionStmt = session.prepare(INSERT_INTO_LATEST_TRANSACTION);
@@ -103,7 +99,7 @@ public class TransactionDao {
 			this.getLatestTransactionByCCno.setIdempotent(true);
 			this.insertLatestTransactionStmt.setIdempotent(true);
 			this.insertTransactionStmt.setIdempotent(true);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			session.close();
@@ -117,39 +113,38 @@ public class TransactionDao {
 
 	public void insertTransactionAsync(Transaction transaction) {
 
-		// ResultSetFuture future =
-		// session.executeAsync(this.insertTransactionStmt.bind(transaction.getCreditCardNo(),
-		// year,
-		// transaction.getTransactionTime(), transaction.getTransactionId(),
-		// transaction.getLocation(),
-		// transaction.getMerchant(), transaction.getAmount(),
-		// transaction.getUserId(), transaction.getStatus(),
-		// transaction.getNotes(), transaction.getTags()));
-		
 		
 		long start = System.nanoTime();
 		
-		session.execute(this.insertLatestTransactionStmt.bind(
-				transaction.getCreditCardNo(), transaction.getTransactionTime(), transaction.getTransactionId(),
-				transaction.getLocation(), transaction.getMerchant(), transaction.getAmount(), transaction.getUserId(),
-				transaction.getStatus(), transaction.getNotes(), transaction.getTags()));
+//		ResultSetFuture future1 = session.executeAsync(this.insertTransactionStmt.bind(transaction.getCreditCardNo(),
+//				transaction.getTransactionTime().getYear(), transaction.getTransactionTime(),
+//				transaction.getTransactionId(), transaction.getLocation(), transaction.getMerchant(),
+//				transaction.getAmount(), transaction.getUserId(), transaction.getStatus(), transaction.getNotes(),
+//				transaction.getTags()));
+		
+		ResultSetFuture future2 = session.executeAsync(this.insertLatestTransactionStmt.bind(transaction.getCreditCardNo(),
+				transaction.getTransactionTime(), transaction.getTransactionId(), transaction.getLocation(),
+				transaction.getMerchant(), transaction.getAmount(), transaction.getUserId(), transaction.getStatus(),
+				transaction.getNotes(), transaction.getTags()));
 
+		future2.getUninterruptibly();
+		
 		// do stuff
 		long end = System.nanoTime();
-		long microseconds = (end - start)/1000;
-		
-		//responseSizes.update(microseconds);
-		
-		if (microseconds > max){
+		long microseconds = (end - start) / 1000;
+
+		// responseSizes.update(microseconds);
+
+		if (microseconds > max) {
 			max = microseconds;
 			logger.info("Max : " + max);
 		}
-		
+
 		long total = count.incrementAndGet();
 
 		if (total % 10000 == 0) {
-			logger.info("Total transactions processed : " + total   + " - " + printStats());
-			//printHostInfo();
+			logger.info("Total transactions processed : " + total + " - " + printStats());
+			// printHostInfo();
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -160,28 +155,31 @@ public class TransactionDao {
 
 	}
 
-	private void printHostInfo(){
+	private void printHostInfo() {
 		Collection<Host> connectedHosts = session.getState().getConnectedHosts();
-		
-		for (Host host : connectedHosts){
+
+		for (Host host : connectedHosts) {
 			logger.info("Open Connections(" + host.getAddress() + ") : " + session.getState().getOpenConnections(host));
 			logger.info("In Flight Queries(" + host.getAddress() + ") : " + session.getState().getInFlightQueries(host));
 		}
 	}
-	
-	private String printStats() {		
-		
-		return (cluster.getMetrics().getErrorMetrics().getSpeculativeExecutions().getCount() + "," +
-				cluster.getMetrics().getRequestsTimer().getCount() + "," +
-				format(this.responseSizes.getSnapshot().get95thPercentile()) + ", " + format(this.responseSizes.getSnapshot().get99thPercentile())  + ", " + 
-				format(this.responseSizes.getSnapshot().get999thPercentile()) + ", " + format(this.responseSizes.getSnapshot().getMax()) + 
-				" Mean : " + format(this.responseSizes.getSnapshot().getMean()));
-		
+
+	private String printStats() {
+
+		return (cluster.getMetrics().getErrorMetrics().getSpeculativeExecutions().getCount() + ","
+				+ cluster.getMetrics().getRequestsTimer().getCount() + ","
+				+ format(this.responseSizes.getSnapshot().get95thPercentile()) + ", "
+				+ format(this.responseSizes.getSnapshot().get99thPercentile()) + ", "
+				+ format(this.responseSizes.getSnapshot().get999thPercentile()) + ", "
+				+ format(this.responseSizes.getSnapshot().getMax()) + " Mean : " + format(this.responseSizes
+				.getSnapshot().getMean()));
+
 	}
 
-	public String format(double d){
-		return String.format( "%.2f", d/1000);
+	public String format(double d) {
+		return String.format("%.2f", d / 1000);
 	}
+
 	public Transaction getTransaction(String transactionId) {
 
 		ResultSetFuture rs = this.session.executeAsync(this.getTransactionById.bind(transactionId));
@@ -213,24 +211,24 @@ public class TransactionDao {
 	}
 
 	public List<Transaction> getLatestTransactionsForCCNo(String ccNo) {
-		
+
 		long start = System.nanoTime();
-		
+
 		ResultSetFuture resultSet = this.session.executeAsync(getLatestTransactionByCCno.bind(ccNo));
-		
+
 		long end = System.nanoTime();
-		long microseconds = (end - start)/1000;
-		
-		if (microseconds > max){
+		long microseconds = (end - start) / 1000;
+
+		if (microseconds > max) {
 			max = microseconds;
 			logger.info("Max : " + max);
 		}
-		
+
 		counter++;
-		if (counter % 10000==0){
+		if (counter % 10000 == 0) {
 			logger.info(printStats());
 		}
-		
+
 		return processResultSet(resultSet.getUninterruptibly(), null);
 	}
 
@@ -241,38 +239,51 @@ public class TransactionDao {
 	}
 
 	public List<Transaction> getTransactionsForCCNoTagsAndDate(String ccNo, Set<String> tags, DateTime from, DateTime to) {
-		ResultSet resultSet = this.session.execute(getLatestTransactionByCCnoDate.bind(ccNo, from.toDate(), to.toDate()));
+		ResultSet resultSet = this.session
+				.execute(getLatestTransactionByCCnoDate.bind(ccNo, from.toDate(), to.toDate()));
 
 		return processResultSet(resultSet, tags);
 	}
 
-	public List<Transaction> getTransactionsForCCNoTagsAndDateSolr(String ccNo, Set<String> tags, DateTime from, DateTime to) {
-		String location = TransactionGenerator.locations.get(new Double(Math.random() * TransactionGenerator.locations.size()).intValue());
-		String issuer = TransactionGenerator.issuers.get(new Double(Math.random() * TransactionGenerator.issuers.size()).intValue());
-	
-		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='" + ccNo + "' and solr_query = "
-				+ "'{\"q\":\"cc_no:" + ccNo + "\", \"fq\":\"tags:Home AND "
-						+ "location:" + location + " AND amount:[100 TO 3000] AND transaction_time:[2016-05-20T17:33:18Z TO *] \"}' limit  1000;";
-		
-//		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='" + ccNo + "' and solr_query = "
-//				+ "'{\"q\":\"cc_no:" + ccNo + "\", \"fq\":\"tags:Home\","
-//						+ "\"fq\":\"location:" + location + "\","
-//								+ "\"fq\":\"amount:[100 TO 3000]\","
-//								+ "\"fq\":\"transaction_time:[2016-05-20T17:33:18Z TO *] \"}' limit  1000;";
+	public List<Transaction> getTransactionsForCCNoTagsAndDateSolr(String ccNo, Set<String> tags, DateTime from,
+			DateTime to) {
+		String location = TransactionGenerator.locations.get(new Double(Math.random()
+				* TransactionGenerator.locations.size()).intValue());
+		String issuer = TransactionGenerator.issuers
+				.get(new Double(Math.random() * TransactionGenerator.issuers.size()).intValue());
 
-		
+		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='" + ccNo
+				+ "' and solr_query = " + "'{\"q\":\"cc_no:" + ccNo + "\", \"fq\":\"tags:Home AND " + "location:"
+				+ location
+				+ " AND amount:[100 TO 3000] AND transaction_time:[2016-05-20T17:33:18Z TO *] \"}' limit  1000;";
+
+		// String cql =
+		// "select * from datastax_banking_iot.latest_transactions where cc_no='"
+		// + ccNo + "' and solr_query = "
+		// + "'{\"q\":\"cc_no:" + ccNo + "\", \"fq\":\"tags:Home\","
+		// + "\"fq\":\"location:" + location + "\","
+		// + "\"fq\":\"amount:[100 TO 3000]\","
+		// +
+		// "\"fq\":\"transaction_time:[2016-05-20T17:33:18Z TO *] \"}' limit  1000;";
+
 		ResultSet resultSet = this.session.execute(cql);
 		logger.info(printStats());
-		
+
 		return processResultSet(resultSet, tags);
 	}
-		
+
 	public List<Transaction> getTransactionsForCCNoTagsAndDateSolr1(String ccNo) {
 		Timer timer1 = new Timer();
 		timer1.start();
-		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='" + ccNo + "' and solr_query = "
-				+ "'{\"q\":\"cc_no:" + ccNo + "\", \"fq\":\"cc_no:" + ccNo + " AND tags:Home AND transaction_time:[2016-05-20T17:33:18Z TO 2016-06-20T17:33:18Z] \"}' limit  1000;";
-		
+		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='"
+				+ ccNo
+				+ "' and solr_query = "
+				+ "'{\"q\":\"cc_no:"
+				+ ccNo
+				+ "\", \"fq\":\"cc_no:"
+				+ ccNo
+				+ " AND tags:Home AND transaction_time:[2016-05-20T17:33:18Z TO 2016-06-20T17:33:18Z] \"}' limit  1000;";
+
 		ResultSet resultSet = this.session.execute(cql);
 		timer1.end();
 		long millis = timer1.getTimeTakenMillis();
@@ -281,16 +292,15 @@ public class TransactionDao {
 		logger.info(printStats());
 		return processResultSet(resultSet, null);
 	}
-	
+
 	public List<Transaction> getTransactionsForCCNoTagsAndDateSolr2(String ccNo) {
 		Timer timer1 = new Timer();
 		timer1.start();
-		
-		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='" + ccNo + "' and solr_query = "
-				+ "'{\"q\":\"*:*\", \"fq\":\"cc_no:" + ccNo + "\", \"fq\":\"tags:Home\","
-								+ "\"fq\":\"transaction_time:[2016-05-20T17:33:18Z TO 2016-06-20T17:33:18Z] \"}' limit  1000;";
 
-		
+		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='" + ccNo
+				+ "' and solr_query = " + "'{\"q\":\"*:*\", \"fq\":\"cc_no:" + ccNo + "\", \"fq\":\"tags:Home\","
+				+ "\"fq\":\"transaction_time:[2016-05-20T17:33:18Z TO 2016-06-20T17:33:18Z] \"}' limit  1000;";
+
 		ResultSet resultSet = this.session.execute(cql);
 		timer1.end();
 		long millis = timer1.getTimeTakenMillis();
@@ -299,7 +309,7 @@ public class TransactionDao {
 		logger.info(printStats());
 		return processResultSet(resultSet, null);
 	}
-	
+
 	private List<Transaction> processResultSet(ResultSet resultSet, Set<String> tags) {
 		List<Row> rows = resultSet.all();
 		List<Transaction> transactions = new ArrayList<Transaction>();

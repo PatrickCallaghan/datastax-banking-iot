@@ -35,7 +35,9 @@
        that you fully re-index after changing this setting as it can
        affect both how text is indexed and queried.
     -->
-  <luceneMatchVersion>LUCENE_46</luceneMatchVersion>
+  <luceneMatchVersion>LUCENE_4_10_3</luceneMatchVersion>
+
+  <queryExecutorThreads>16</queryExecutorThreads>
 
   <!-- Enable DSE Search new type mappings -->
   <dseTypeMappingVersion>2</dseTypeMappingVersion>
@@ -84,8 +86,8 @@
        via solr.MMapDirectoryFactory, solr.NIOFSDirectoryFactory, or
        solr.SimpleFSDirectoryFactory.
 
-       solr.RAMDirectoryFactory is memory based, not
-       persistent, and doesn't work with replication.
+       DSE Search does not support solr.RAMDirectoryFactory or any other
+       non-persistent DirectoryFactory implementation.
     -->
   <directoryFactory class="solr.StandardDirectoryFactory" name="DirectoryFactory"/>
 
@@ -271,7 +273,7 @@
            highWaterMarkMB - the maximum number of used MBs before triggering asynchronous LRU eviction.
            lowWaterMarkMB - the maximum number of used MBs after eviction is completed.
       -->
-    <filterCache class="solr.SolrFilterCache" highWaterMarkMB="256" lowWaterMarkMB="128"/>
+    <filterCache class="solr.SolrFilterCache" highWaterMarkMB="8192" lowWaterMarkMB="1280"/>
 
     <!-- Query Result Cache
 

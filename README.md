@@ -16,7 +16,7 @@ To create some transactions, run the following
 
 You can use the following parameters to change the default no of transactions and credit cards 
 	
-	-DnoOfTransactions=10000000 -DnoOfCreditCards=1000000
+	-DnoOfTransactions=10000000 -DnoOfCreditCards=100000
 	
 To create the solr core, run 
 
