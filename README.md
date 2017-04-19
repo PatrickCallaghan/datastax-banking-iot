@@ -30,9 +30,9 @@ use datastax_banking_iot;
 
 select * from latest_transactions where cc_no = '1234123412341234';
 
-select * from latest_transactions where cc_no = '1234123412341234' and transaction_time > '2015-12-31';
+select * from latest_transactions where cc_no = '1234123412341234' and transaction_time > '2017-04-08';
 
-select * from latest_transactions where cc_no = '1234123412341234' and transaction_time > '2015-12-31' and transaction_time < '2016-01-27';
+select * from latest_transactions where cc_no = '1234123412341234' and transaction_time > '2017-04-08' and transaction_time < '2017-04-20';
 ```
 
 We can also use functions like sum to aggregate the totals from a time range. 
@@ -40,7 +40,7 @@ We can also use functions like sum to aggregate the totals from a time range.
 ```
 use datastax_banking_iot;
 
-select sum(amount) from latest_transactions where cc_no = '1234123412341234' and transaction_time > '2016-08-08';
+select sum(amount) from latest_transactions where cc_no = '1234123412341234' and transaction_time > '2017-04-08';
 ```
 
 For the (historic) transaction table we need to add the year into our queries.
@@ -48,9 +48,9 @@ For the (historic) transaction table we need to add the year into our queries.
 ```
 select * from transactions where cc_no = '1234123412341234' and year = 2016;
 
-select * from transactions where cc_no = '1234123412341234' and year = 2016 and transaction_time > '2015-12-31';
+select * from transactions where cc_no = '1234123412341234' and year = 2016 and transaction_time > '2017-01-31';
 
-select * from transactions where cc_no = '1234123412341234' and year = 2016 and transaction_time > '2015-12-31' and transaction_time < '2016-01-27';
+select * from transactions where cc_no = '1234123412341234' and year = 2016 and transaction_time > '2017-01-31' and transaction_time < '2017-04-27';
 ```
 Using the solr_query
 
@@ -68,15 +68,15 @@ select * from latest_transactions where solr_query = '{"q":"cc_no:12341234123412
 ```
 To use the webservice, start the web server using 
 ```
-mvn jetty:run
+mvn jetty:run -DcontactPoints=node0 -Djetty.port=8081
 ```
 Open a browser and use a url like 
 ```
-http://{servername}:8080/datastax-banking-iot/rest/gettransactions/{creditcardno}/{from}/{to}
+http://{servername}:8081/datastax-banking-iot/rest/gettransactions/{creditcardno}/{from}/{to}
 ```
 Note : the from and to are dates in the format yyyyMMdd hh:mm:ss - eg 
 ```
-http://localhost:8080/datastax-banking-iot/rest/gettransactions/1234123412341234/20150101/20160102/
+http://localhost:8081/datastax-banking-iot/rest/gettransactions/1234123412341234/20170401/20170420/
 ```
 
 To run the requests run the following 
