@@ -113,9 +113,6 @@ public class TransactionDao {
 
 	public void insertTransactionAsync(Transaction transaction) {
 
-		
-		long start = System.nanoTime();
-		
 //		ResultSetFuture future1 = session.executeAsync(this.insertTransactionStmt.bind(transaction.getCreditCardNo(),
 //				transaction.getTransactionTime().getYear(), transaction.getTransactionTime(),
 //				transaction.getTransactionId(), transaction.getLocation(), transaction.getMerchant(),
@@ -131,50 +128,39 @@ public class TransactionDao {
 		
 		// do stuff
 		long end = System.nanoTime();
-		long microseconds = (end - start) / 1000;
-
-		// responseSizes.update(microseconds);
-
-		if (microseconds > max) {
-			max = microseconds;
-			logger.info("Max : " + max);
-		}
-
 		long total = count.incrementAndGet();
 
 		if (total % 10000 == 0) {
-			logger.info("Total transactions processed : " + total + " - " + printStats());
-			// printHostInfo();
+			logger.info("Total transactions processed : " + total)
+			;
 			try {
-				Thread.sleep(100);
+				Thread.sleep(1);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-
 	}
 
-	private void printHostInfo() {
-		Collection<Host> connectedHosts = session.getState().getConnectedHosts();
-
-		for (Host host : connectedHosts) {
-			logger.info("Open Connections(" + host.getAddress() + ") : " + session.getState().getOpenConnections(host));
-			logger.info("In Flight Queries(" + host.getAddress() + ") : " + session.getState().getInFlightQueries(host));
-		}
-	}
-
-	private String printStats() {
-
-		return (cluster.getMetrics().getErrorMetrics().getSpeculativeExecutions().getCount() + ","
-				+ cluster.getMetrics().getRequestsTimer().getCount() + ","
-				+ format(this.responseSizes.getSnapshot().get95thPercentile()) + ", "
-				+ format(this.responseSizes.getSnapshot().get99thPercentile()) + ", "
-				+ format(this.responseSizes.getSnapshot().get999thPercentile()) + ", "
-				+ format(this.responseSizes.getSnapshot().getMax()) + " Mean : " + format(this.responseSizes
-				.getSnapshot().getMean()));
-
-	}
+//	private void printHostInfo() {
+//		Collection<Host> connectedHosts = session.getState().getConnectedHosts();
+//
+//		for (Host host : connectedHosts) {
+//			logger.info("Open Connections(" + host.getAddress() + ") : " + session.getState().getOpenConnections(host));
+//			logger.info("In Flight Queries(" + host.getAddress() + ") : " + session.getState().getInFlightQueries(host));
+//		}
+//	}
+//
+//	private String printStats() {
+//
+//		return (cluster.getMetrics().getErrorMetrics().getSpeculativeExecutions().getCount() + ","
+//				+ cluster.getMetrics().getRequestsTimer().getCount() + ","
+//				+ format(this.responseSizes.getSnapshot().get95thPercentile()) + ", "
+//				+ format(this.responseSizes.getSnapshot().get99thPercentile()) + ", "
+//				+ format(this.responseSizes.getSnapshot().get999thPercentile()) + ", "
+//				+ format(this.responseSizes.getSnapshot().getMax()) + " Mean : " + format(this.responseSizes
+//				.getSnapshot().getMean()));
+//
+//	}
 
 	public String format(double d) {
 		return String.format("%.2f", d / 1000);
@@ -224,10 +210,7 @@ public class TransactionDao {
 			logger.info("Max : " + max);
 		}
 
-		counter++;
-		if (counter % 10000 == 0) {
-			logger.info(printStats());
-		}
+		counter++;		
 
 		return processResultSet(resultSet.getUninterruptibly(), null);
 	}
@@ -267,8 +250,6 @@ public class TransactionDao {
 		// "\"fq\":\"transaction_time:[2016-05-20T17:33:18Z TO *] \"}' limit  1000;";
 
 		ResultSet resultSet = this.session.execute(cql);
-		logger.info(printStats());
-
 		return processResultSet(resultSet, tags);
 	}
 
@@ -285,11 +266,6 @@ public class TransactionDao {
 				+ " AND tags:Home AND transaction_time:[2016-05-20T17:33:18Z TO 2016-06-20T17:33:18Z] \"}' limit  1000;";
 
 		ResultSet resultSet = this.session.execute(cql);
-		timer1.end();
-		long millis = timer1.getTimeTakenMillis();
-		ma.newNum(millis);
-		System.out.println(ma.getAvg());
-		logger.info(printStats());
 		return processResultSet(resultSet, null);
 	}
 
@@ -302,11 +278,6 @@ public class TransactionDao {
 				+ "\"fq\":\"transaction_time:[2016-05-20T17:33:18Z TO 2016-06-20T17:33:18Z] \"}' limit  1000;";
 
 		ResultSet resultSet = this.session.execute(cql);
-		timer1.end();
-		long millis = timer1.getTimeTakenMillis();
-		ma.newNum(millis);
-		System.out.println(ma.getAvg());
-		logger.info(printStats());
 		return processResultSet(resultSet, null);
 	}
 
