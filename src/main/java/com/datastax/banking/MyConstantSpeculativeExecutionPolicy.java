@@ -24,7 +24,6 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Host;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.policies.SpeculativeExecutionPolicy;
-import com.datastax.driver.core.policies.SpeculativeExecutionPolicy.SpeculativeExecutionPlan;
 import com.google.common.base.Preconditions;
 
 /**

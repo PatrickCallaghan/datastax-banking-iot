@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import com.datastax.banking.model.Transaction;
 import com.datastax.banking.service.SearchService;
-import com.datastax.banking.service.SearchService;
 
 @WebService
 @Path("/")

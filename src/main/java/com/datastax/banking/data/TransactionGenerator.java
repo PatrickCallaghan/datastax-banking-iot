@@ -48,6 +48,10 @@ public class TransactionGenerator {
 		transaction.setNotes(note);
 		transaction.setTags(tags);
 		transaction.setTransactionTime(newDate.toDate());
+		if (Math.random() > .99){
+			String status = statuses.get(new Double(Math.random() * statuses.size()).intValue());
+			transaction.setStatus(status);
+		}
 		return transaction;
 	}
 
@@ -101,4 +105,6 @@ public class TransactionGenerator {
 			"Work", "Work", "Work", "Home", "Home", "Home", "Work", "Work", "Home", "Work", "Work", "Work", "Work",
 			"Work", "Work", "Work", "Work");
 
+	public static List<String> statuses  = Arrays.asList("SUCCESS", "FAILED", "CANCELLED");
+	
 }

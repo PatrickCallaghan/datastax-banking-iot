@@ -9,7 +9,7 @@ public class SchemaTeardown extends RunCQLFile {
 	public static void main(String args[]){
 		
 		SchemaTeardown setup = new SchemaTeardown("cql/drop_schema.cql");
-		setup.internalSetup();
+		setup.internalSetup(false);
 		setup.shutdown();
 	}
 }

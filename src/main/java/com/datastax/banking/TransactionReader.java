@@ -1,13 +1,9 @@
 package com.datastax.banking;
 
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
-
-import org.joda.time.DateTime;
 
 import com.datastax.banking.dao.TransactionDao;
 import com.datastax.banking.model.Transaction;
-import com.datastax.banking.service.SearchService;
 import com.datastax.demo.utils.KillableRunner;
 
 public class TransactionReader implements KillableRunner {

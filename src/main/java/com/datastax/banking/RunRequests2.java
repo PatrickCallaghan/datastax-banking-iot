@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import com.datastax.banking.dao.TransactionDao;
 import com.datastax.banking.data.TransactionGenerator;
 import com.datastax.banking.model.Transaction;
-import com.datastax.banking.service.SearchService;
 import com.datastax.demo.utils.KillableRunner;
 import com.datastax.demo.utils.PropertyHelper;
 import com.datastax.demo.utils.ThreadUtils;

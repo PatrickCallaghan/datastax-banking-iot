@@ -43,6 +43,14 @@ use datastax_banking_iot;
 select sum(amount) from latest_transactions where cc_no = '1234123412341234' and transaction_time > '2017-04-08';
 ```
 
+As part of the setup, we have created a user defined function (UDF) which will group any text column with the amounts to help us to see spending usage. So we can ask the following 
+```
+select group_and_total(merchant, amount) from latest_transactions where cc_no='1234123412341833' ;
+
+select group_and_total(location, amount) from latest_transactions where cc_no='1234123412341833' ;
+
+```
+
 For the (historic) transaction table we need to add the year into our queries.
 
 ```
