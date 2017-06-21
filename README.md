@@ -20,7 +20,7 @@ You can use the following parameters to change the default no of transactions an
 	
 To create the solr core, run 
 
-	bin/dsetool create_core datastax_banking_iot.latest_transactions schema=schema.xml solrconfig=solrconfig.xml	 reindex=true 
+	bin/dsetool create_core datastax_banking_iot.latest_transactions schema=schema.xml solrconfig=solr_config.xml	 reindex=true 
 
 An example of cql queries would be
 
@@ -59,7 +59,7 @@ select * from transactions where cc_no = '1234123412341234' and year = 2016;
 select * from transactions where cc_no = '1234123412341234' and year = 2016 and transaction_time > '2017-01-31';
 
 select * from transactions where cc_no = '1234123412341234' and year = 2016 and transaction_time > '2017-01-31' and transaction_time < '2017-04-27';
-```
+``` 	
 Using the solr_query
 
 Get all the latest transactions from PC World in London (This is accross all credit cards and users)
