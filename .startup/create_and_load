@@ -1,0 +1,23 @@
+echo 'Installing Maven'
+if [ -f /etc/redhat-release ]; then
+  sudo yum install maven -y
+fi
+
+if [ -f /etc/lsb-release ]; then
+  sudo apt-get install maven -y
+fi
+
+echo 'Building schema'
+sudo mvn clean compile exec:java -Dexec.mainClass="com.datastax.demo.SchemaSetup" -DcontactPoints=node0
+
+echo 'Creating cores'
+sudo dsetool create_core datastax_banking_iot.latest_transactions schema=schema.xml solrconfig=solr_config.xml	 reindex=true
+
+echo 'Starting load data -> ~/loader.log'
+sudo nohup mvn exec:java -Dexec.mainClass="com.datastax.banking.Main" -DcontactPoints=node0 -DnoOfTransactions=10000000 -DnoOfCreditCards=100000 > ~/loader.log &
+
+echo 'Starting webservice on 8081'
+sudo nohup mvn jetty:run -DcontactPoints=node0 -Djetty.port=8081 > ~/webservice.log &
+
+sleep 2
+echo 'Finished setting up'

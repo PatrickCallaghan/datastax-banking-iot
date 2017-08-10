@@ -61,7 +61,7 @@ select * from transactions where cc_no = '1234123412341234' and year = 2016 and 
 select * from transactions where cc_no = '1234123412341234' and year = 2016 and transaction_time > '2017-01-31' and transaction_time < '2017-04-27';
 ``` 	
 Using the solr_query
-
+	
 Get all the latest transactions from PC World in London (This is accross all credit cards and users)
 ```
 select * from latest_transactions where solr_query = 'merchant:PC+World location:London' limit  100;

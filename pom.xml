@@ -10,10 +10,11 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.datastax.cassandra</groupId>
-			<artifactId>cassandra-driver-core</artifactId>
-			<version>3.1.0</version>
+			<groupId>com.datastax.dse</groupId>
+			<artifactId>dse-java-driver-core</artifactId>
+			<version>1.4.0</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
