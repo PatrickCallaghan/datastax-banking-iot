@@ -50,4 +50,59 @@ public class TestFilterTimes {
 		logger.info("Time taken for " + noOfRequests + " requests "  + timer.getTimeTakenMillis() + "ms");
 		System.exit(0);
 	}
+	
+	
+	@Test
+	public void testFilterAllFunction(){
+		String contactPointsStr = PropertyHelper.getProperty("contactPoints", "localhost");
+		String noOfCreditCardsStr = PropertyHelper.getProperty("noOfCreditCards", "1000000");
+		String noOfRequestsStr = PropertyHelper.getProperty("noOfRequests", "10000");
+
+		TransactionDao dao = new TransactionDao(contactPointsStr.split(","));
+		
+		
+		int noOfCreditCards = Integer.parseInt(noOfCreditCardsStr);
+		int noOfRequests = Integer.parseInt(noOfRequestsStr);
+		
+		Timer timer = new Timer();
+		for (int i = 0; i < noOfRequests; i++) {
+			Timer timer1 = new Timer();
+			String location = TransactionGenerator.locations.get(new Double(Math.random() * TransactionGenerator.locations.size()).intValue());
+			String ccNo = TransactionGenerator.getCreditCardNo(noOfCreditCards)+"";
+			dao.getIdsForCCAndFilter(location, ccNo);
+			timer1.end();
+			logger.info(ccNo+ " - " + timer1.getTimeTakenMillis() + "ms");
+		}
+		timer.end();
+		
+		logger.info("Time taken for " + noOfRequests + " requests "  + timer.getTimeTakenMillis() + "ms");
+		System.exit(0);
+	}
+	
+	@Test
+	public void testFilterAllFunction1(){
+		String contactPointsStr = PropertyHelper.getProperty("contactPoints", "localhost");
+		String noOfCreditCardsStr = PropertyHelper.getProperty("noOfCreditCards", "1000000");
+		String noOfRequestsStr = PropertyHelper.getProperty("noOfRequests", "100");
+
+		TransactionDao dao = new TransactionDao(contactPointsStr.split(","));
+		
+		
+		int noOfCreditCards = Integer.parseInt(noOfCreditCardsStr);
+		int noOfRequests = Integer.parseInt(noOfRequestsStr);
+		
+		Timer timer = new Timer();
+		for (int i = 0; i < noOfRequests; i++) {
+			Timer timer1 = new Timer();
+			String location = TransactionGenerator.locations.get(new Double(Math.random() * TransactionGenerator.locations.size()).intValue());
+			String ccNo = TransactionGenerator.getCreditCardNo(noOfCreditCards)+"";
+			dao.getTransactionIdsForCCAndFilter(location, ccNo);
+			timer1.end();
+			logger.info(ccNo+ " - " + timer1.getTimeTakenMillis() + "ms");
+		}
+		timer.end();
+		
+		logger.info("Time taken for " + noOfRequests + " requests "  + timer.getTimeTakenMillis() + "ms");
+		System.exit(0);
+	}
 }

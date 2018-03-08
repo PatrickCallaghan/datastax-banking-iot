@@ -6,7 +6,7 @@ keyspace: stresscql
 
 # The CQL for creating a keyspace (optional if it already exists)
 keyspace_definition: |
-  CREATE KEYSPACE stresscql WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};
+  CREATE KEYSPACE stresscql WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 # Table name
 table: latest_transactions
 
@@ -18,7 +18,7 @@ table_definition: |
 columnspec:
   - name: cc_no
     size: fixed(16)       #credit card nos approx 16 
-    population: uniform(1..1M)  #1M possible userid to pick from
+    population: uniform(1..50M)  #1M possible userid to pick from
 
 ### Batch Ratio Distribution Specifications ###
 insert:

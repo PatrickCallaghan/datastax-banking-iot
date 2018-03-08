@@ -21,7 +21,8 @@ public class TransactionGenerator {
 
 		long noOfMillis = noOfDays * DAY_MILLIS;
 		
-		long creditCardNo = getCreditCardNo(noOfCreditCards);
+		long creditCardNo = getCreditCardNo(noOfCreditCards);		
+		String userId = "U" + creditCardNo % 5000;
 
 		int noOfItems = new Double(Math.ceil(Math.random() * 5)).intValue();
 
@@ -47,11 +48,12 @@ public class TransactionGenerator {
 		transaction.setLocation(location);
 		transaction.setNotes(note);
 		transaction.setTags(tags);
+		transaction.setUserId(userId);
+		transaction.setItems(new HashMap());
 		transaction.setTransactionTime(newDate.toDate());
-		if (Math.random() > .99){
-			String status = statuses.get(new Double(Math.random() * statuses.size()).intValue());
-			transaction.setStatus(status);
-		}
+		
+		String status = statuses.get(new Double(Math.random() * statuses.size()).intValue());
+		transaction.setStatus(status);
 		return transaction;
 	}
 
@@ -90,7 +92,7 @@ public class TransactionGenerator {
 	}
 	
 	public static List<String> locations = Arrays.asList("London", "Manchester", "Liverpool", "Glasgow", "Dundee",
-			"Birmingham");
+			"Birmingham", "Dublin", "Cork", "Belfast");
 
 	public static List<String> issuers = Arrays.asList("Tesco", "Sainsbury", "AsdaWal-MartStores", "Morrisons",
 			"Marks&Spencer", "Boots", "JohnLewis", "Waitrose", "Argos", "Co-op", "Currys", "PCWorld", "B&Q",
@@ -105,6 +107,9 @@ public class TransactionGenerator {
 			"Work", "Work", "Work", "Home", "Home", "Home", "Work", "Work", "Home", "Work", "Work", "Work", "Work",
 			"Work", "Work", "Work", "Work");
 
-	public static List<String> statuses  = Arrays.asList("SUCCESS", "FAILED", "CANCELLED");
+	public static List<String> statuses  = Arrays.asList("SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", 
+			"SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", 
+			"SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", "SUCCESS", 
+			"FAILED", "CANCELLED");
 	
 }

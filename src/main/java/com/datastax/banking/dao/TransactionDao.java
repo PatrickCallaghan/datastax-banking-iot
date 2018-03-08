@@ -23,6 +23,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.TupleValue;
 import com.datastax.driver.core.policies.ConstantSpeculativeExecutionPolicy;
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
@@ -57,6 +58,14 @@ public class TransactionDao {
 	private static final String GET_LATEST_TRANSACTIONS_BY_CCNO_DATE = "select * from " + latestTransactionTable
 			+ " where cc_no = ? and transaction_time >= ? and transaction_time < ?";
 
+	private static final String FILTER = "select filter_location_all(location, ?, transaction_id) as result from " + latestTransactionTable 
+			+ " where cc_no = ?";
+	
+	private static final String FILTER_ALL = "select filter_location_full(location, ?, transaction_id,transaction_time, user_id, amount, merchant, status)"
+			+ " as result from " + latestTransactionTable + " where cc_no = ?";
+	
+	private PreparedStatement filter;
+	private PreparedStatement filterAll;
 	private PreparedStatement insertTransactionStmt;
 	private PreparedStatement insertLatestTransactionStmt;
 	private PreparedStatement getTransactionById;
@@ -84,6 +93,8 @@ public class TransactionDao {
 		this.session = cluster.connect();
 
 		try {
+			this.filter = session.prepare(FILTER);
+			this.filterAll = session.prepare(FILTER_ALL);	
 			this.insertTransactionStmt = session.prepare(INSERT_INTO_TRANSACTION);
 			this.insertLatestTransactionStmt = session.prepare(INSERT_INTO_LATEST_TRANSACTION);
 
@@ -125,7 +136,6 @@ public class TransactionDao {
 		future2.getUninterruptibly();
 		
 		// do stuff
-		long end = System.nanoTime();
 		long total = count.incrementAndGet();
 
 		if (total % 10000 == 0) {
@@ -279,6 +289,48 @@ public class TransactionDao {
 		return processResultSet(resultSet, null);
 	}
 
+	public List<String> getIdsForCCAndFilter(String filter, String ccNo){
+		
+		
+		List<String> ids = new ArrayList<String>();
+		ResultSet results = this.session.execute(this.filter.bind(filter, ccNo));
+		
+		Row row = results.one();
+				
+		Set<TupleValue> set = row.getSet("result", TupleValue.class);
+		
+		for (TupleValue tupleValue : set){
+
+			String transactionId = tupleValue.getString(0); 			
+			ids.add(transactionId);
+		}
+		return ids;
+	}
+	
+	public List<Transaction> getTransactionIdsForCCAndFilter(String filter, String ccNo){		
+		
+		List<Transaction> transactions = new ArrayList<Transaction>();
+		ResultSet results = this.session.execute(this.filterAll.bind(filter, ccNo));
+		
+		Row row = results.one();
+				
+		Set<TupleValue> set = row.getSet("result", TupleValue.class);
+		
+		for (TupleValue tupleValue : set){
+
+			logger.info(tupleValue.toString());
+			Transaction t = new Transaction();
+			t.setTransactionId(tupleValue.getString(0));
+			t.setTransactionTime(tupleValue.getTimestamp(1));
+			t.setUserId(tupleValue.getString(2));
+			t.setLocation(tupleValue.getString(3));
+			t.setAmount(tupleValue.getDouble(4));
+			t.setMerchant(tupleValue.getString(5));
+			t.setStatus(tupleValue.getString(6));
+		}
+		return transactions;
+	}
+	
 	private List<Transaction> processResultSet(ResultSet resultSet, Set<String> tags) {
 		List<Row> rows = resultSet.all();
 		List<Transaction> transactions = new ArrayList<Transaction>();
