@@ -58,9 +58,6 @@ public class TransactionDao {
 	private static final String GET_LATEST_TRANSACTIONS_BY_CCNO_DATE = "select * from " + latestTransactionTable
 			+ " where cc_no = ? and transaction_time >= ? and transaction_time < ?";
 
-	private static final String FILTER = "select filter_location_all(location, ?, transaction_id) as result from " + latestTransactionTable 
-			+ " where cc_no = ?";
-	
 	private static final String FILTER_ALL = "select filter_location_full(location, ?, transaction_id,transaction_time, user_id, amount, merchant, status)"
 			+ " as result from " + latestTransactionTable + " where cc_no = ?";
 	
@@ -93,7 +90,6 @@ public class TransactionDao {
 		this.session = cluster.connect();
 
 		try {
-			this.filter = session.prepare(FILTER);
 			this.filterAll = session.prepare(FILTER_ALL);	
 			this.insertTransactionStmt = session.prepare(INSERT_INTO_TRANSACTION);
 			this.insertLatestTransactionStmt = session.prepare(INSERT_INTO_LATEST_TRANSACTION);
