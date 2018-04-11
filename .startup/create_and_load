@@ -10,9 +10,6 @@ fi
 echo 'Building schema'
 sudo mvn clean compile exec:java -Dexec.mainClass="com.datastax.demo.SchemaSetup" -DcontactPoints=node0
 
-echo 'Creating cores'
-sudo dsetool create_core datastax_banking_iot.latest_transactions schema=schema.xml solrconfig=solr_config.xml	 reindex=true
-
 echo 'Starting load data -> ~/loader.log'
 sudo nohup mvn exec:java -Dexec.mainClass="com.datastax.banking.Main" -DcontactPoints=node0 -DnoOfTransactions=10000000 -DnoOfCreditCards=100000 > ~/loader.log &
 
