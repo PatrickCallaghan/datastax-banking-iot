@@ -49,12 +49,14 @@ public class TransactionDao {
 			+ " (cc_no, year, transaction_time, transaction_id, location, merchant, amount, user_id, status, notes, tags) values (?,?,?,?,?,?,?,?,?,?,?);";
 	private static final String INSERT_INTO_LATEST_TRANSACTION = "Insert into "
 			+ latestTransactionTable
-			+ " (cc_no, transaction_time, transaction_id, location, merchant, amount, user_id, status, notes, tags) values (?,?,?,?,?,?,?,?,?,?) ";
+			+ " (cc_no, transaction_time, transaction_id, location, merchant, amount, user_id, status, notes, tags, items_) values (?,?,?,?,?,?,?,?,?,?,?) ";
 
 	private static final String GET_LATEST_TRANSACTIONS_BY_CCNO = "select * from " + latestTransactionTable
 			+ " where cc_no = ?";
+	
 	private static final String GET_TRANSACTIONS_BY_CCNO = "select * from " + transactionTable
 			+ " where cc_no = ? and year = ? and transaction_time >= ? and transaction_time < ?";
+	
 	private static final String GET_LATEST_TRANSACTIONS_BY_CCNO_DATE = "select * from " + latestTransactionTable
 			+ " where cc_no = ? and transaction_time >= ? and transaction_time < ?";
 
@@ -127,7 +129,7 @@ public class TransactionDao {
 		ResultSetFuture future2 = session.executeAsync(this.insertLatestTransactionStmt.bind(transaction.getCreditCardNo(),
 				transaction.getTransactionTime(), transaction.getTransactionId(), transaction.getLocation(),
 				transaction.getMerchant(), transaction.getAmount(), transaction.getUserId(), transaction.getStatus(),
-				transaction.getNotes(), transaction.getTags()));
+				transaction.getNotes(), transaction.getTags(), transaction.getItems()));
 
 		future2.getUninterruptibly();
 		
@@ -196,6 +198,7 @@ public class TransactionDao {
 		t.setNotes(row.getString("notes"));
 		t.setStatus(row.getString("status"));
 		t.setTags(row.getSet("tags", String.class));
+		t.setItems(row.getMap("items_", String.class, Double.class));
 
 		return t;
 	}

@@ -48,12 +48,12 @@ public class TransactionGenerator {
 		transaction.setLocation(location);
 		transaction.setNotes(note);
 		transaction.setTags(tags);
-		transaction.setUserId(userId);
-		transaction.setItems(new HashMap());
+		transaction.setUserId(userId);		
 		transaction.setTransactionTime(newDate.toDate());
 		
 		String status = statuses.get(new Double(Math.random() * statuses.size()).intValue());
 		transaction.setStatus(status);
+		
 		return transaction;
 	}
 
@@ -83,7 +83,7 @@ public class TransactionGenerator {
 		for (int i = 0; i < noOfItems; i++) {
 
 			double amount = new Double(Math.random() * 1000);
-			items.put("item" + i, amount);
+			items.put("items_" + i, amount);
 
 			totalAmount += amount;
 		}

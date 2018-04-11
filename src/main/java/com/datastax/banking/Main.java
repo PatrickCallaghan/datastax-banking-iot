@@ -1,9 +1,7 @@
 package com.datastax.banking;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -17,7 +15,6 @@ import com.datastax.banking.data.TransactionGenerator;
 import com.datastax.banking.model.Transaction;
 import com.datastax.demo.utils.KillableRunner;
 import com.datastax.demo.utils.PropertyHelper;
-import com.datastax.demo.utils.ThreadUtils;
 import com.datastax.demo.utils.Timer;
 
 public class Main {
@@ -27,16 +24,15 @@ public class Main {
 	public Main() {
 
 		String contactPointsStr = PropertyHelper.getProperty("contactPoints", "localhost");
-		String noOfCreditCardsStr = PropertyHelper.getProperty("noOfCreditCards", "5000");
+		String noOfCreditCardsStr = PropertyHelper.getProperty("noOfCreditCards", "100000");
 		String noOfTransactionsStr = PropertyHelper.getProperty("noOfTransactions", "1000000");
-		int noOfDays = Integer.parseInt(PropertyHelper.getProperty("noOfDays", "360"));
+		int noOfDays = Integer.parseInt(PropertyHelper.getProperty("noOfDays", "0"));
 		
 		BlockingQueue<Transaction> queue = new ArrayBlockingQueue<Transaction>(1000);
 		List<KillableRunner> tasks = new ArrayList<>();
-		Map<Integer, Transaction> transactionMap = new HashMap<Integer, Transaction>();
-		
+
 		//Executor for Threads
-		int noOfThreads = Integer.parseInt(PropertyHelper.getProperty("noOfThreads", "10"));
+		int noOfThreads = Integer.parseInt(PropertyHelper.getProperty("noOfThreads", "5"));
 		ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
 		TransactionDao dao = new TransactionDao(contactPointsStr.split(","));
 
@@ -64,8 +60,17 @@ public class Main {
 			}
 		}
 		timer.end();
-		ThreadUtils.shutdown(tasks, executor);
-		System.exit(0);
+		while (true){
+			try{
+				queue.put(TransactionGenerator.createRandomTransaction(noOfCreditCards,0, new Transaction()));
+				Thread.sleep(5);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+//		ThreadUtils.shutdown(tasks, executor);
+//		System.exit(0);
 	}
 
 	/**

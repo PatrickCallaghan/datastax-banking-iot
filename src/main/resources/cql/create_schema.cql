@@ -10,7 +10,7 @@ create table if not exists transactions(
  	transaction_id text,
  	user_id text,
 	location text,
-	items map<text, double>,
+	items_ map<text, double>,
 	merchant text,
 	amount double,
 	status text,
@@ -25,7 +25,7 @@ create table if not exists latest_transactions(
  	transaction_id text,
  	user_id text,
 	location text,
-	items map<text, double>,
+	items_ map<text, double>,
 	merchant text,
 	amount double,
 	status text,
@@ -35,3 +35,4 @@ create table if not exists latest_transactions(
 ) WITH CLUSTERING ORDER BY (transaction_time desc) 
 and default_time_to_live = 2592000;
 
+CREATE SEARCH INDEX ON datastax_banking_iot.latest_transactions WITH COLUMNS * { docValues:true };
