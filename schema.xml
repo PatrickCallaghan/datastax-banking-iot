@@ -13,16 +13,16 @@
 </types>
 <fields>
 <field indexed="true" multiValued="false" name="transaction_time" stored="true" type="TrieDateField" docValues="true"/>
-<field indexed="true" multiValued="false" name="transaction_id" stored="true" type="StrField"/>
-<field indexed="true" multiValued="false" name="merchant" stored="true" type="StrField"/>
-<field indexed="true" multiValued="false" name="user_id" stored="true" type="StrField"/>
-<dynamicField indexed="true" multiValued="false" name="items*" stored="true" type="TrieDoubleField"/>
-<field indexed="true" multiValued="false" name="amount" stored="true" type="TrieDoubleField"/>
-<field indexed="true" multiValued="false" name="status" stored="true" type="StrField"/>
-<field indexed="true" multiValued="false" name="notes" stored="true" type="StrField"/>
-<field indexed="true" multiValued="false" name="location" stored="true" type="StrField"/>
-<field indexed="true" multiValued="false" name="cc_no" stored="true" type="StrField"/>
-<field indexed="true" multiValued="true" name="tags" stored="true" type="StrField"/>
+<field indexed="true" multiValued="false" name="transaction_id" stored="true" type="StrField" docValues="true"/>
+<field indexed="true" multiValued="false" name="merchant" stored="true" type="StrField" docValues="true"/>
+<field indexed="true" multiValued="false" name="user_id" stored="true" type="StrField" docValues="true"/>
+<dynamicField indexed="true" multiValued="false" name="items*" stored="true" type="TrieDoubleField" docValues="true"/>
+<field indexed="true" multiValued="false" name="amount" stored="true" type="TrieDoubleField" docValues="true"/>
+<field indexed="true" multiValued="false" name="status" stored="true" type="StrField" docValues="true"/>
+<field indexed="true" multiValued="false" name="notes" stored="true" type="StrField" docValues="true"/>
+<field indexed="true" multiValued="false" name="location" stored="true" type="StrField" docValues="true"/>
+<field indexed="true" multiValued="false" name="cc_no" stored="true" type="StrField" docValues="true"/>
+<field indexed="true" multiValued="true" name="tags" stored="true" type="StrField" docValues="true"/>
 </fields>
 <uniqueKey>(cc_no,transaction_time)</uniqueKey>
 </schema>

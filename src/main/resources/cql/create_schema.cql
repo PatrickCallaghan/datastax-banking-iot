@@ -34,5 +34,3 @@ create table if not exists latest_transactions(
 	PRIMARY KEY (cc_no, transaction_time) 
 ) WITH CLUSTERING ORDER BY (transaction_time desc) 
 and default_time_to_live = 2592000;
-
-CREATE SEARCH INDEX ON datastax_banking_iot.latest_transactions WITH COLUMNS * { docValues:true };

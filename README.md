@@ -47,7 +47,7 @@ As part of the setup, we have created a user defined function (UDF) which will g
 ```
 select group_and_total(merchant, amount) from latest_transactions where cc_no='1234123412341833' ;
 
-select group_and_total(location, amount) from latest_transactions where cc_no='1234123412341833' and transaction_time > '2017-04-08' and transaction_time < '2017-04-20'; ;
+select group_and_total(location, amount) from latest_transactions where cc_no='1234123412341833' and transaction_time > '2017-04-08';
 
 ```
 

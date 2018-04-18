@@ -1,6 +1,7 @@
 package com.datastax.banking.dao;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +64,9 @@ public class TransactionDao {
 	private static final String FILTER_ALL = "select filter_location_full(location, ?, transaction_id,transaction_time, user_id, amount, merchant, status)"
 			+ " as result from " + latestTransactionTable + " where cc_no = ?";
 	
+	private static final String DELETE_RANGE = "delete from " + latestTransactionTable + " where cc_no = ? and transaction_time > ?";
+	
+	
 	private PreparedStatement filter;
 	private PreparedStatement filterAll;
 	private PreparedStatement insertTransactionStmt;
@@ -71,6 +75,7 @@ public class TransactionDao {
 	private PreparedStatement getTransactionByCCno;
 	private PreparedStatement getLatestTransactionByCCno;
 	private PreparedStatement getLatestTransactionByCCnoDate;
+	private PreparedStatement deleteRange;
 
 	private MovingAverage ma = new MovingAverage(50);
 
@@ -99,6 +104,7 @@ public class TransactionDao {
 			this.getLatestTransactionByCCno = session.prepare(GET_LATEST_TRANSACTIONS_BY_CCNO);
 			this.getTransactionByCCno = session.prepare(GET_TRANSACTIONS_BY_CCNO);
 			this.getLatestTransactionByCCnoDate = session.prepare(GET_LATEST_TRANSACTIONS_BY_CCNO_DATE);
+			this.deleteRange = session.prepare(DELETE_RANGE);
 
 			this.insertLatestTransactionStmt.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
 			this.insertTransactionStmt.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
@@ -357,5 +363,18 @@ public class TransactionDao {
 			}
 		}
 		return transactions;
+	}
+
+	public void deleteRange(Date date) {
+		
+		List<Row> rows = session.execute("Select distinct cc_no from " + latestTransactionTable).all();
+		
+		for (Row row: rows){
+			
+			String ccNo = row.getString("cc_no");
+				
+			session.execute(this.deleteRange.bind(ccNo, date));	
+			logger.info("Deleted for " + ccNo);
+		}		
 	}
 }
