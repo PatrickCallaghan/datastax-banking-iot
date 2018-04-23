@@ -10,6 +10,10 @@ To create the schema, run the following
 
 	mvn clean compile exec:java -Dexec.mainClass="com.datastax.demo.SchemaSetup" -DcontactPoints=localhost
 	
+To create the solr core, run 
+
+	bin/dsetool create_core datastax_banking_iot.latest_transactions schema=schema.xml solrconfig=solr_config.xml	 reindex=true 
+
 To create some transactions, run the following 
 	
 	mvn clean compile exec:java -Dexec.mainClass="com.datastax.banking.Main"  -DcontactPoints=localhost
@@ -18,9 +22,6 @@ You can use the following parameters to change the default no of transactions an
 	
 	-DnoOfTransactions=10000000 -DnoOfCreditCards=100000
 	
-To create the solr core, run 
-
-	bin/dsetool create_core datastax_banking_iot.latest_transactions schema=schema.xml solrconfig=solr_config.xml	 reindex=true 
 
 An example of cql queries would be
 
