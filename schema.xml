@@ -16,7 +16,7 @@
 <field indexed="true" multiValued="false" name="transaction_id" stored="true" type="StrField" docValues="true"/>
 <field indexed="true" multiValued="false" name="merchant" stored="true" type="StrField" docValues="true"/>
 <field indexed="true" multiValued="false" name="user_id" stored="true" type="StrField" docValues="true"/>
-<dynamicField indexed="true" multiValued="false" name="items*" stored="true" type="TrieDoubleField" docValues="true"/>
+<dynamicField indexed="true" multiValued="false" name="items_*" stored="true" type="TrieDoubleField" docValues="true"/>
 <field indexed="true" multiValued="false" name="amount" stored="true" type="TrieDoubleField" docValues="true"/>
 <field indexed="true" multiValued="false" name="status" stored="true" type="StrField" docValues="true"/>
 <field indexed="true" multiValued="false" name="notes" stored="true" type="StrField" docValues="true"/>

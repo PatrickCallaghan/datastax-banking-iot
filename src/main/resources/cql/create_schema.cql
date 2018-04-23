@@ -33,4 +33,5 @@ create table if not exists latest_transactions(
 	tags set<text>,
 	PRIMARY KEY (cc_no, transaction_time) 
 ) WITH CLUSTERING ORDER BY (transaction_time desc) 
-and default_time_to_live = 2592000;
+and default_time_to_live = 2592000 
+and gc_grace_seconds = 10; 

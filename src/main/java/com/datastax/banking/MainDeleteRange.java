@@ -13,7 +13,7 @@ public class MainDeleteRange {
 
 	private static Logger logger = LoggerFactory.getLogger(MainDeleteRange.class);
 	
-	private static SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd hh:MM:ss");
+	private static SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
 	public MainDeleteRange() {
 
@@ -21,9 +21,8 @@ public class MainDeleteRange {
 		
 		TransactionDao dao = new TransactionDao(contactPointsStr.split(","));
 		try {
-			dao.deleteRange(formatter.parse("2018/17/04 18:00:00"));
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
+			dao.deleteRange(formatter.parse("16-04-2018 12:00:00"));
+		} catch (ParseException e) {			
 			e.printStackTrace();
 		}
 	}

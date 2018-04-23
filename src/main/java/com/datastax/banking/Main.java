@@ -26,7 +26,7 @@ public class Main {
 		String contactPointsStr = PropertyHelper.getProperty("contactPoints", "localhost");
 		String noOfCreditCardsStr = PropertyHelper.getProperty("noOfCreditCards", "100000");
 		String noOfTransactionsStr = PropertyHelper.getProperty("noOfTransactions", "1000000");
-		int noOfDays = Integer.parseInt(PropertyHelper.getProperty("noOfDays", "0"));
+		int noOfDays = Integer.parseInt(PropertyHelper.getProperty("noOfDays", "10"));
 		
 		BlockingQueue<Transaction> queue = new ArrayBlockingQueue<Transaction>(1000);
 		List<KillableRunner> tasks = new ArrayList<>();
