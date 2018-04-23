@@ -1,6 +1,5 @@
 package com.datastax.banking.dao;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -12,7 +11,6 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.datastax.banking.data.TransactionGenerator;
 import com.datastax.banking.model.Transaction;
@@ -52,10 +50,6 @@ public class TransactionDao {
 	private static final String INSERT_INTO_LATEST_TRANSACTION = "Insert into "
 			+ latestTransactionTable
 			+ " (cc_no, transaction_time, transaction_id, location, merchant, amount, user_id, status, notes, tags, items_) values (?,?,?,?,?,?,?,?,?,?,?) ";
-	private static final String INSERT_INTO_LATEST_TRANSACTION1 = "Insert into "
-			+ latestTransactionTable
-			+ "1 (cc_no, transaction_time, transaction_id, location, merchant, amount, user_id, status, notes, tags, items_) values (?,?,?,?,?,?,?,?,?,?,?) ";
-
 	private static final String GET_LATEST_TRANSACTIONS_BY_CCNO = "select * from " + latestTransactionTable
 			+ " where cc_no = ?";
 	
@@ -68,7 +62,7 @@ public class TransactionDao {
 	private static final String FILTER_ALL = "select filter_location_full(location, ?, transaction_id,transaction_time, user_id, amount, merchant, status)"
 			+ " as result from " + latestTransactionTable + " where cc_no = ?";
 	
-	private static final String DELETE_RANGE = "delete from " + latestTransactionTable + "1 where cc_no = ? and transaction_time < ?";
+	private static final String DELETE_RANGE = "delete from " + latestTransactionTable + " where cc_no = ? and transaction_time < ?";
 	
 	
 	private PreparedStatement filter;
@@ -88,7 +82,6 @@ public class TransactionDao {
 	private long max = 0;
 
 	private final MetricRegistry metrics = new MetricRegistry();
-	private final Histogram responseSizes = metrics.histogram(MetricRegistry.name(TransactionDao.class, "latencies"));
 	private Cluster cluster;
 	private int counter;
 
@@ -105,7 +98,6 @@ public class TransactionDao {
 			this.filterAll = session.prepare(FILTER_ALL);	
 			this.insertTransactionStmt = session.prepare(INSERT_INTO_TRANSACTION);
 			this.insertLatestTransactionStmt = session.prepare(INSERT_INTO_LATEST_TRANSACTION);
-			this.insertLatestTransactionStmt1 = session.prepare(INSERT_INTO_LATEST_TRANSACTION1);
 
 			this.getLatestTransactionByCCno = session.prepare(GET_LATEST_TRANSACTIONS_BY_CCNO);
 			this.getTransactionByCCno = session.prepare(GET_TRANSACTIONS_BY_CCNO);
@@ -132,18 +124,12 @@ public class TransactionDao {
 
 	public void insertTransactionAsync(Transaction transaction) {
 
-		ResultSetFuture future1 = session.executeAsync(this.insertLatestTransactionStmt1.bind(transaction.getCreditCardNo(),
-				transaction.getTransactionTime(), transaction.getTransactionId(), transaction.getLocation(),
-				transaction.getMerchant(), transaction.getAmount(), transaction.getUserId(), transaction.getStatus(),
-				transaction.getNotes(), transaction.getTags(), transaction.getItems()));
-
-		ResultSetFuture future2 = session.executeAsync(this.insertLatestTransactionStmt.bind(transaction.getCreditCardNo(),
+		ResultSetFuture future1 = session.executeAsync(this.insertLatestTransactionStmt.bind(transaction.getCreditCardNo(),
 				transaction.getTransactionTime(), transaction.getTransactionId(), transaction.getLocation(),
 				transaction.getMerchant(), transaction.getAmount(), transaction.getUserId(), transaction.getStatus(),
 				transaction.getNotes(), transaction.getTags(), transaction.getItems()));
 
 		future1.getUninterruptibly();
-		future2.getUninterruptibly();
 		
 		// do stuff
 		long total = count.incrementAndGet();
