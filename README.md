@@ -4,7 +4,9 @@ See here for use case and requirements - https://gist.github.com/PatrickCallagha
 
 A bank wants to help locate and tag all their expenses/transactions in their bank account to help them categorise their spending. The users will be able to tag any expense/transaction to allow for efficient retrieval and reporting. There will be 10 millions customers with on average 500 transactions a year. Some business customers may have up to 10,000 transactions a year. The client wants the tagged items to show up in searches in less than a second to give users a seamless experience between devices.
 
-This requires DataStax Enterprise running in Solr mode.
+This requires DSE Search to be running and since User Defined Functions (UDTs) will be used, they will need to be enabled - 
+	
+	https://docs.datastax.com/en/dse/6.0/cql/cql/cql_using/useCreateUDF.html
 
 To create the schema, run the following
 
