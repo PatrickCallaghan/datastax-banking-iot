@@ -28,8 +28,8 @@ public class TransactionSearcher implements KillableRunner {
 			
 			if (transaction!=null){
 				try {
-					List<Transaction> t = this.service.getTransactionsForCCNoTagsAndDateSolr(transaction.getCreditCardNo(), 
-							transaction.getTags(), DateTime.now().minusDays(100), DateTime.now());
+//					List<Transaction> t = this.service.getTransactionsForCCNoTagsAndDateSolr(transaction.getCreditCardNo(), 
+//							transaction.getTags(), DateTime.now().minusDays(100), DateTime.now());
 										
 				} catch (Exception e) {
 					e.printStackTrace();

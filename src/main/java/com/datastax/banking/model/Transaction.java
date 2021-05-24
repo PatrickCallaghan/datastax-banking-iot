@@ -17,6 +17,7 @@ public class Transaction {
 	private String status;	
 	private String notes;
 	private Set<String> tags;
+	private RiskStatus riskStatus;
 
 	public Transaction() {
 		super();
@@ -126,16 +127,29 @@ public class Transaction {
 	public void setTags(Set<String> tags) {
 		this.tags = tags;
 	}
+	
+	public void setRiskStatus(RiskStatus riskStatus) {
+		this.riskStatus = riskStatus;
+		
+	}
+	
+	public RiskStatus getRiskStatus() {
+		return riskStatus;
+	}
 
 	@Override
 	public String toString() {
 		return "Transaction [creditCardNo=" + creditCardNo + ", userId=" + userId + ", transactionTime="
 				+ transactionTime + ", transactionId=" + transactionId + ", items=" + items + ", location=" + location
 				+ ", merchant=" + merchant + ", amount=" + amount + ", status=" + status + ", notes=" + notes
-				+ ", tags=" + tags + "]";
+				+ ", tags=" + tags + ", riskStatus=" + riskStatus + "]";
 	}
+
+
 
 	public enum Status {
 		CHECK, APPROVED, DECLINED, CLIENT_APPROVED, CLIENT_DECLINED, CLIENT_APPROVAL, TIMEOUT
 	}
+
+	
 }

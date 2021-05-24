@@ -23,7 +23,7 @@ public class MainRealTime {
 	public MainRealTime() {
 
 		String contactPointsStr = PropertyHelper.getProperty("contactPoints", "localhost");
-		String noOfCreditCardsStr = PropertyHelper.getProperty("noOfCreditCards", "100000");
+		String noOfCreditCardsStr = PropertyHelper.getProperty("noOfCreditCards", "1000");
 		String noOfTransactionsStr = PropertyHelper.getProperty("noOfTransactions", "1000000");
 		int noOfDays = Integer.parseInt(PropertyHelper.getProperty("noOfDays", "0"));
 		
@@ -46,7 +46,7 @@ public class MainRealTime {
 			executor.execute(task);
 			tasks.add(task);
 		}
-				
+					
 		while (true){
 			try{
 				queue.put(TransactionGenerator.createRandomTransaction(noOfCreditCards,noOfDays, new Transaction()));

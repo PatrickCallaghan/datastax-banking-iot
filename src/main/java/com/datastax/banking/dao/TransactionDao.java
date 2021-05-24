@@ -1,32 +1,27 @@
 package com.datastax.banking.dao;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.MetricRegistry;
-import com.datastax.banking.data.TransactionGenerator;
 import com.datastax.banking.model.Transaction;
 import com.datastax.demo.utils.MovingAverage;
-import com.datastax.demo.utils.Timer;
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.ConsistencyLevel;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.TupleValue;
-import com.datastax.driver.core.policies.ConstantSpeculativeExecutionPolicy;
-import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
-import com.datastax.driver.core.policies.TokenAwarePolicy;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.CqlSessionBuilder;
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet;
+import com.datastax.oss.driver.api.core.cql.PreparedStatement;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.Row;
+import com.datastax.oss.driver.api.core.data.TupleValue;
 
 /**
  * Inserts into 2 tables
@@ -37,10 +32,10 @@ import com.datastax.driver.core.policies.TokenAwarePolicy;
 public class TransactionDao {
 
 	private static Logger logger = LoggerFactory.getLogger(TransactionDao.class);
-	private Session session;
+	private CqlSession session;
 
-	private static String keyspaceName = "datastax_banking_iot";
-
+	private static String keyspaceName = "datastax_banking";
+	
 	private static String transactionTable = keyspaceName + ".transactions";
 	private static String latestTransactionTable = keyspaceName + ".latest_transactions";
 
@@ -59,9 +54,9 @@ public class TransactionDao {
 	private static final String GET_LATEST_TRANSACTIONS_BY_CCNO_DATE = "select * from " + latestTransactionTable
 			+ " where cc_no = ? and transaction_time >= ? and transaction_time < ?";
 
-	private static final String FILTER_ALL = "select filter_location_full(location, ?, transaction_id,transaction_time, user_id, amount, merchant, status)"
-			+ " as result from " + latestTransactionTable + " where cc_no = ?";
-	
+//	private static final String FILTER_ALL = "select (location, ?, transaction_id,transaction_time, user_id, amount, merchant, status)"
+//			+ " as result from " + latestTransactionTable + " where cc_no = ?";
+//	
 	private static final String DELETE_RANGE = "delete from " + latestTransactionTable + " where cc_no = ? and transaction_time < ?";
 	
 	
@@ -81,21 +76,18 @@ public class TransactionDao {
 	private AtomicLong count = new AtomicLong(0);
 	private long max = 0;
 
-	private final MetricRegistry metrics = new MetricRegistry();
-	private Cluster cluster;
-	private int counter;
+	private int counter = 0;
 
 	public TransactionDao(String[] contactPoints) {
 
-		ConstantSpeculativeExecutionPolicy policy = new ConstantSpeculativeExecutionPolicy(5, 3);
-
-		cluster = Cluster.builder().addContactPoints(contactPoints).withSpeculativeExecutionPolicy(policy)
-				.withLoadBalancingPolicy(new TokenAwarePolicy(DCAwareRoundRobinPolicy.builder().build())).build();
-
-		this.session = cluster.connect();
+	    CqlSessionBuilder builder = CqlSession.builder();
+	    builder.withLocalDatacenter("core_dc")
+	    .withAuthCredentials("viewer", "Viewer!")
+	    .addContactPoint(new InetSocketAddress(contactPoints[0], 9042));		
+		session = builder.build();
 
 		try {
-			this.filterAll = session.prepare(FILTER_ALL);	
+//			this.filterAll = session.prepare(FILTER_ALL);	
 			this.insertTransactionStmt = session.prepare(INSERT_INTO_TRANSACTION);
 			this.insertLatestTransactionStmt = session.prepare(INSERT_INTO_LATEST_TRANSACTION);
 
@@ -104,17 +96,10 @@ public class TransactionDao {
 			this.getLatestTransactionByCCnoDate = session.prepare(GET_LATEST_TRANSACTIONS_BY_CCNO_DATE);
 			this.deleteRange = session.prepare(DELETE_RANGE);
 
-			this.insertLatestTransactionStmt.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
-			this.insertTransactionStmt.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
-
-			this.getLatestTransactionByCCno.setIdempotent(true);
-			this.insertLatestTransactionStmt.setIdempotent(true);
-			this.insertTransactionStmt.setIdempotent(true);
-
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			session.close();
-			cluster.close();
 		}
 	}
 
@@ -124,17 +109,16 @@ public class TransactionDao {
 
 	public void insertTransactionAsync(Transaction transaction) {
 
-		ResultSetFuture future1 = session.executeAsync(this.insertLatestTransactionStmt.bind(transaction.getCreditCardNo(),
-				transaction.getTransactionTime(), transaction.getTransactionId(), transaction.getLocation(),
+		session.execute(this.insertLatestTransactionStmt.bind(transaction.getCreditCardNo(),
+				transaction.getTransactionTime().toInstant(), transaction.getTransactionId(), transaction.getLocation(),
 				transaction.getMerchant(), transaction.getAmount(), transaction.getUserId(), transaction.getStatus(),
 				transaction.getNotes(), transaction.getTags(), transaction.getItems()));
 
-		future1.getUninterruptibly();
 		
 		// do stuff
 		long total = count.incrementAndGet();
 
-		if (total % 10000 == 0) {
+		if (total % 1000 == 0) {
 			logger.info("Total transactions processed : " + total)
 			;
 			try {
@@ -172,9 +156,9 @@ public class TransactionDao {
 
 	public Transaction getTransaction(String transactionId) {
 
-		ResultSetFuture rs = this.session.executeAsync(this.getTransactionById.bind(transactionId));
+		ResultSet rs = this.session.execute(this.getTransactionById.bind(transactionId));
 
-		Row row = rs.getUninterruptibly().one();
+		Row row = rs.one();
 		if (row == null) {
 			throw new RuntimeException("Error - no transaction for id:" + transactionId);
 		}
@@ -191,7 +175,7 @@ public class TransactionDao {
 		t.setMerchant(row.getString("merchant"));
 		t.setLocation(row.getString("location"));
 		t.setTransactionId(row.getString("transaction_id"));
-		t.setTransactionTime(row.getTimestamp("transaction_time"));
+		t.setTransactionTime(Date.from(row.getInstant("transaction_time")));
 		t.setUserId(row.getString("user_id"));
 		t.setNotes(row.getString("notes"));
 		t.setStatus(row.getString("status"));
@@ -205,7 +189,7 @@ public class TransactionDao {
 
 		long start = System.nanoTime();
 
-		ResultSetFuture resultSet = this.session.executeAsync(getLatestTransactionByCCno.bind(ccNo));
+		ResultSet resultSet = this.session.execute(getLatestTransactionByCCno.bind(ccNo));
 
 		long end = System.nanoTime();
 		long microseconds = (end - start) / 1000;
@@ -217,7 +201,7 @@ public class TransactionDao {
 
 		counter++;		
 
-		return processResultSet(resultSet.getUninterruptibly(), null);
+		return processResultSet(resultSet, null);
 	}
 
 	public List<Transaction> getLatestTransactionsForCCNoTagsAndDate(String ccNo, Set<String> tags, DateTime from,
@@ -233,58 +217,58 @@ public class TransactionDao {
 		return processResultSet(resultSet, tags);
 	}
 
-	public List<Transaction> getTransactionsForCCNoTagsAndDateSolr(String ccNo, Set<String> tags, DateTime from,
-			DateTime to) {
-		String location = TransactionGenerator.locations.get(new Double(Math.random()
-				* TransactionGenerator.locations.size()).intValue());
-		String issuer = TransactionGenerator.issuers
-				.get(new Double(Math.random() * TransactionGenerator.issuers.size()).intValue());
+//	public List<Transaction> getTransactionsForCCNoTagsAndDateSolr(String ccNo, Set<String> tags, DateTime from,
+//			DateTime to) {
+//		String location = TransactionGenerator.locations.get(new Double(Math.random()
+//				* TransactionGenerator.locations.size()).intValue());
+//		String issuer = TransactionGenerator.issuers
+//				.get(new Double(Math.random() * TransactionGenerator.issuers.size()).intValue());
+//
+//		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='" + ccNo
+//				+ "' and solr_query = " + "'{\"q\":\"cc_no:" + ccNo + "\", \"fq\":\"tags:Home AND " + "location:"
+//				+ location
+//				+ " AND amount:[100 TO 3000] AND transaction_time:[2016-05-20T17:33:18Z TO *] \"}' limit  1000;";
+//
+//		// String cql =
+//		// "select * from datastax_banking_iot.latest_transactions where cc_no='"
+//		// + ccNo + "' and solr_query = "
+//		// + "'{\"q\":\"cc_no:" + ccNo + "\", \"fq\":\"tags:Home\","
+//		// + "\"fq\":\"location:" + location + "\","
+//		// + "\"fq\":\"amount:[100 TO 3000]\","
+//		// +
+//		// "\"fq\":\"transaction_time:[2016-05-20T17:33:18Z TO *] \"}' limit  1000;";
+//
+//		ResultSet resultSet = this.session.execute(cql);
+//		return processResultSet(resultSet, tags);
+//	}
 
-		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='" + ccNo
-				+ "' and solr_query = " + "'{\"q\":\"cc_no:" + ccNo + "\", \"fq\":\"tags:Home AND " + "location:"
-				+ location
-				+ " AND amount:[100 TO 3000] AND transaction_time:[2016-05-20T17:33:18Z TO *] \"}' limit  1000;";
-
-		// String cql =
-		// "select * from datastax_banking_iot.latest_transactions where cc_no='"
-		// + ccNo + "' and solr_query = "
-		// + "'{\"q\":\"cc_no:" + ccNo + "\", \"fq\":\"tags:Home\","
-		// + "\"fq\":\"location:" + location + "\","
-		// + "\"fq\":\"amount:[100 TO 3000]\","
-		// +
-		// "\"fq\":\"transaction_time:[2016-05-20T17:33:18Z TO *] \"}' limit  1000;";
-
-		ResultSet resultSet = this.session.execute(cql);
-		return processResultSet(resultSet, tags);
-	}
-
-	public List<Transaction> getTransactionsForCCNoTagsAndDateSolr1(String ccNo) {
-		Timer timer1 = new Timer();
-		timer1.start();
-		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='"
-				+ ccNo
-				+ "' and solr_query = "
-				+ "'{\"q\":\"cc_no:"
-				+ ccNo
-				+ "\", \"fq\":\"cc_no:"
-				+ ccNo
-				+ " AND tags:Home AND transaction_time:[2016-05-20T17:33:18Z TO 2016-06-20T17:33:18Z] \"}' limit  1000;";
-
-		ResultSet resultSet = this.session.execute(cql);
-		return processResultSet(resultSet, null);
-	}
-
-	public List<Transaction> getTransactionsForCCNoTagsAndDateSolr2(String ccNo) {
-		Timer timer1 = new Timer();
-		timer1.start();
-
-		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='" + ccNo
-				+ "' and solr_query = " + "'{\"q\":\"*:*\", \"fq\":\"cc_no:" + ccNo + "\", \"fq\":\"tags:Home\","
-				+ "\"fq\":\"transaction_time:[2016-05-20T17:33:18Z TO 2016-06-20T17:33:18Z] \"}' limit  1000;";
-
-		ResultSet resultSet = this.session.execute(cql);
-		return processResultSet(resultSet, null);
-	}
+//	public List<Transaction> getTransactionsForCCNoTagsAndDateSolr1(String ccNo) {
+//		Timer timer1 = new Timer();
+//		timer1.start();
+//		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='"
+//				+ ccNo
+//				+ "' and solr_query = "
+//				+ "'{\"q\":\"cc_no:"
+//				+ ccNo
+//				+ "\", \"fq\":\"cc_no:"
+//				+ ccNo
+//				+ " AND tags:Home AND transaction_time:[2016-05-20T17:33:18Z TO 2016-06-20T17:33:18Z] \"}' limit  1000;";
+//
+//		ResultSet resultSet = this.session.execute(cql);
+//		return processResultSet(resultSet, null);
+//	}
+//
+//	public List<Transaction> getTransactionsForCCNoTagsAndDateSolr2(String ccNo) {
+//		Timer timer1 = new Timer();
+//		timer1.start();
+//
+//		String cql = "select * from datastax_banking_iot.latest_transactions where cc_no='" + ccNo
+//				+ "' and solr_query = " + "'{\"q\":\"*:*\", \"fq\":\"cc_no:" + ccNo + "\", \"fq\":\"tags:Home\","
+//				+ "\"fq\":\"transaction_time:[2016-05-20T17:33:18Z TO 2016-06-20T17:33:18Z] \"}' limit  1000;";
+//
+//		ResultSet resultSet = this.session.execute(cql);
+//		return processResultSet(resultSet, null);
+//	}
 
 	public List<String> getIdsForCCAndFilter(String filter, String ccNo){
 		
@@ -318,7 +302,7 @@ public class TransactionDao {
 			logger.info(tupleValue.toString());
 			Transaction t = new Transaction();
 			t.setTransactionId(tupleValue.getString(0));
-			t.setTransactionTime(tupleValue.getTimestamp(1));
+			t.setTransactionTime(Date.from(row.getInstant(1)));
 			t.setUserId(tupleValue.getString(2));
 			t.setLocation(tupleValue.getString(3));
 			t.setAmount(tupleValue.getDouble(4));

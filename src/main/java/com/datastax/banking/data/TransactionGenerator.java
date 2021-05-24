@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.joda.time.DateTime;
 
+import com.datastax.banking.model.RiskStatus;
 import com.datastax.banking.model.Transaction;
 
 public class TransactionGenerator {
@@ -50,6 +51,7 @@ public class TransactionGenerator {
 		transaction.setTags(tags);
 		transaction.setUserId(userId);		
 		transaction.setTransactionTime(newDate.toDate());
+		transaction.setRiskStatus(RiskStatus.NONE);
 		
 		String status = statuses.get(new Double(Math.random() * statuses.size()).intValue());
 		transaction.setStatus(status);

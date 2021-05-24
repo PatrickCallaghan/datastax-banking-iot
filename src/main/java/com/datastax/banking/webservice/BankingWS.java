@@ -4,7 +4,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import javax.jws.WebService;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -22,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import com.datastax.banking.model.Transaction;
 import com.datastax.banking.service.SearchService;
 
-@WebService
 @Path("/")
 public class BankingWS {
 

@@ -43,7 +43,7 @@ public class TestFilterTimes {
 			Transaction t = new Transaction();
 			t.setCreditCardNo("" + TransactionGenerator.getCreditCardNo(noOfCreditCards));
 			
-			dao.getTransactionsForCCNoTagsAndDateSolr1(t.getCreditCardNo());
+			//dao.getTransactionsForCCNoTagsAndDateSolr1(t.getCreditCardNo());
 		}
 		timer.end();
 		
