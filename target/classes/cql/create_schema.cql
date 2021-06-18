@@ -1,4 +1,4 @@
-create keyspace if not exists datastax_banking WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1' };
+create keyspace if not exists datastax_banking WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '3' };
 
 use datastax_banking; 
 create table if not exists latest_transactions(

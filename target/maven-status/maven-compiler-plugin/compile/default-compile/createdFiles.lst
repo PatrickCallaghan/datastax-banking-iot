@@ -10,12 +10,14 @@ com/datastax/demo/utils/Timer.class
 com/datastax/demo/SchemaTeardown.class
 com/datastax/demo/utils/ByteUtils.class
 com/datastax/demo/SchemaSetup.class
+com/datastax/demo/utils/StandardDeviation.class
 com/datastax/banking/model/Transaction$Status.class
 com/datastax/demo/utils/FileUtils.class
 com/datastax/banking/TransactionSearcher.class
 com/datastax/banking/dao/TransactionDao.class
 com/datastax/banking/TransactionWriter.class
 com/datastax/demo/utils/ThreadUtils.class
+com/datastax/banking/model/RiskStatus.class
 com/datastax/banking/TransactionReader.class
 com/datastax/banking/RunRequests.class
 com/datastax/banking/webservice/BankingWS.class

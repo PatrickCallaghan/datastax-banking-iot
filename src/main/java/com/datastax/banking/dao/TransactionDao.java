@@ -81,7 +81,7 @@ public class TransactionDao {
 	public TransactionDao(String[] contactPoints) {
 
 	    CqlSessionBuilder builder = CqlSession.builder();
-	    builder.withLocalDatacenter("core_dc")
+	    builder.withLocalDatacenter("DC1")
 	    .withAuthCredentials("viewer", "Viewer!")
 	    .addContactPoint(new InetSocketAddress(contactPoints[0], 9042));		
 		session = builder.build();
